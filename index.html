@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jay_portfolio</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="images/icon.jpg">
+    <script
+      src="https://kit.fontawesome.com/0e9462225b.js"
+      crossorigin="anonymous"
+    ></script>
+</head>
+<body>
+    <header id="header">
+        <div class="container nevbar">
+            <nav>
+                <h1 class="logo"><span class="j">J</span>ay.dev</h1>
+                <ul id="sidemenu">
+                    <li><a style="text-decoration : none; color: black;" href="#header">Home</a></li>
+                    <li><a style="text-decoration : none; color: black;" href="#about">About Me</a></li>
+                    <li><a style="text-decoration : none; color: black;"href="#skill">Skills</a></li>
+                    <li><a style="text-decoration : none; color: black;"href="#experience">Experience</a></li>
+                    <li><a style="text-decoration : none; color: black;"href="#portfolio">Portfolio</a></li>
+                    <li><a style="text-decoration : none; color: black;"href="#contact">Contact Me</a></li>
+                    <i
+                        class="fas fa-times"
+                        style="color: #000000;"
+                        onclick="closemenu(sidemenu)"
+                    ></i>
+                </ul>
+                <i
+                    class="fas fa-bars"
+                    style="color: #000000"
+                    onclick="openmenu(sidemenu)"
+                ></i>
+            </nav>
+            <div class="text">
+                <div class="slide anim">
+                  <span class="one">Hello</span>
+                  <span class="two">I'm</span>
+                </div>
+                <h1 class="anim"> <span></span>Jay <span class="three">Agola</span></span></h1>
+                <h3 class="anim">Software <span class="three" id="simple2">Developer.</span></h3>
+      
+                <p class="anim"></p>
+                <a href="#contact" class="btn1 anim"><span>Contact Me</span></a>
+                
+              </div>
+        </div>
+    </header>
+    <div id="about" class="">
+        <div class="container">
+          <div class="row">
+            <div class="about-1 animonscroll">
+              <img class="top-main animonscroll"
+                src="images/jay_profile.jpg"
+              />
+            </div>
+            <div class="about-2">
+              <h1 class="about-title">About Me</h1>
+              <p>
+                Hello, I am Jay Agola A final Semester Student of B.E. (Information Technology) My interested areas of technology is application development and web development Also completed android application development course from CED and completed web development courses from web. Completed the internship in python and django
+              </p>
+  
+              <div class="tab-title">
+                <p class="tab-links active-link" onclick="opentab('personal')">
+                Personal Details
+                </p>
+                <p class="tab-links" onclick="opentab('education')">Education</p>
+              </div>
+              <div class="tab-contents active-tab" id="personal">
+                <ul>
+                  <li>
+                    <span>Name</span><br />
+                    Jaykumar Agola 
+                  </li>
+                  <li>
+                    <span>Father Name</span><br />
+                    Prakashbhai Agola
+                  </li>
+                  <li>
+                    <span>Address</span><br/>
+                    Plot No - 98/2, sector - 4-A,Gandhinagar,Gujarat.
+                  </li>
+                </ul>
+              </div>
+              <div class="tab-contents" id="education">
+                <ul>
+                  <li>
+                    <span>SSC</span><br />
+                    I Completed my ssc from GSEB Gandhinagar in 2018.
+                  </li>
+                  <li>
+                    <span>HSC</span><br />
+                    I Completed my hsc from GHSEB Gandhinagar in 2020.
+                  </li>
+                  <li>
+                    <span>Graduation</span><br />
+                    I am right now purssuing BE in information technology at GTU Gandhinagar Compelted in 2024.
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+    <div id="skill" class="">
+        <div class="container">
+          <h1 class="about-title">My Skills</h1>
+          <div class="skill-list">
+            <div>
+              <i class="fa-solid fa-code"></i>
+              <h2>Web Developer</h2>
+              <p>
+                developing many type of Website with help of
+                 HTML , CSS , JavaScript , Python , Django , React JS ,Node JS
+                  laguges by using VS code tools
+              </p>
+              <a href="#">Learn more</a>
+            </div>
+            <div>
+              <i class="fa-brands fa-android"></i>
+              <h2>Android Developer</h2>
+              <p>
+                developing diffrent type of Android Application
+                 with the help of the java languge in Android Studio
+                  most of Application are built in Android 
+                  most of the user are use these app and they heve very good ui
+              </p>
+              <a href="#">Learn more</a>
+            </div>
+            <div>
+              <i class="fa-brands fa-app-store-ios"></i>
+              <h2>Ios Application Developer</h2>
+              <p>
+                developing Ios Application with help of dart languge using the flutter
+                 Ios Applicationhave best user interface ios app is easy to use ane user frendly 
+              </p>
+              <a href="#">Learn more</a>
+            </div>
+            <div>
+              <i class="fa-solid fa-mobile"></i>
+              <h2>App Development</h2>
+              <p>
+                developing diffrent type of Android Application and web Application
+                 with the help of the java , python, node js and react netiv js languge 
+                 in Android Studio and vs code
+                  most of Application are built in Android 
+                  most of the user are use these app and they heve very good ui
+                  easy to use Application
+              </p>
+              <a href="#">Learn more</a>
+            </div>
+            <div>
+              <i class="fa-solid fa-crop-simple"></i>
+              <h2>UI-UX Design</h2>
+              <p>
+                developing many type of user interface with help of html,css,react js,flutter for developing i also use vs code and Android Studio
+                and  i also developing user experience side also with help of python,java,JavaScript
+              </p>
+              <a href="#">Learn more</a>
+            </div>
+            <div>
+              <i class="fa-solid fa-robot"></i>
+              <h2>AI - ML</h2>
+              <p>
+                I am also intrested in the Artificial intelligence and Machine learning that why i have to gain the knowlege of the AI and ML
+                also i am a good student
+              </p>
+              <a href="#">Learn more</a>
+            </div>
+          </div>
+        </div>
+    </div>
+    <div id="experience" class="p-5">
+      <div class="container">
+        <h1>
+          Experience
+        </h1>
+        <div class="row">
+          <div class="col">
+            <h3>Android App development</h3>
+            <div>Completed Android Application Development course by Praxware Technologies Pvt. Ltd. along with CED.</div>
+          </div>
+          <div class="col">
+            <h3>Python Django development</h3>
+            <div>Completed 15 days of summer internship at Creart Solutions Pvt. Ltd. where I've learnt python and Django and completed a project of notice hub too.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="portfolio">
+      <div class="container">
+        <h1>Portfolio</h1>
+        <div class="tab-title">
+          <p class="tab-links active-link" onclick="opentab('allapp')">All Application</p>
+          <p class="tab-links" onclick="opentab('mobileapp')">Mobile Application</p>
+          <p class="tab-links" onclick="opentab('webapp')">Web Application</p>
+        </div>
+        <div id="allapp" class="tab-contents active-tab">
+          <div class="row row-col-auto">
+            <div class="col-md-12"><img class="" src="images/m_app_01.png" alt=""></div>
+            <div class="col-md-12"><img class="" src="images/m_app_02.png" alt=""></div>
+            <div class="col-md-12"><img class="" src="images/m_app_03.png" alt=""></div>
+            <div class="col-md-12"><img class="" src="images/web_01.png" alt=""></div>
+            <div class="col-md-12"><img class="" src="images/web_02.png" alt=""></div>
+          </div>
+        </div>
+        <div id="mobileapp" class="tab-contents">
+          <div class="row row-col-auto">
+            <div class="col-md-12"><img class="img-fluid" src="images/m_app_01.png" alt=""></div>
+            <div class="col-md-12"><img class="img-fluid" src="images/m_app_02.png" alt=""></div>
+            <div class="col-md-12"><img class="img-fluid" src="images/m_app_03.png" alt=""></div>
+          </div>
+        </div>
+        <div id="webapp" class="tab-contents">
+          <div class="row row-col-auto">
+            <div class="col-md-12"><img class="img-fluid" src="images/web_01.png" alt=""></div>
+            <div class="col-md-12"><img class="img-fluid" src="images/web_02.png" alt=""></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="contact" class="">
+        <div class="container">
+          <div class="row">
+            <div class="contactleft">
+              <h1 class="about-title">Contact Me</h1>
+              <p>
+                <i class="fa-solid fa-paper-plane"></i>www.jay660@gmail.com
+              </p>
+              <p><i class="fa-solid fa-phone"></i>7202058535</p>
+              <div class="social-icon">
+                <a href="" target="_blank"
+                  ><i class="fa-brands fa-facebook"></i
+                ></a>
+                <a href="" target="_blank"
+                  ><i class="fa-brands fa-twitter-square"></i
+                ></a>
+                <a
+                  href=""
+                  target="_blank"
+                  ><i class="fa-brands fa-instagram"></i
+                ></a>
+                <a
+                  href=""
+                  target="_blank"
+                  ><i class="fa-brands fa-linkedin"></i
+                ></a>
+              </div>
+              <a
+                href=""
+                download
+                class="btn1"
+                ><span>Download CV</span></a
+              >
+            </div>
+            <div class="contactright">
+              <form name="submit-to-google-sheet">
+                <input type="text" name="Name" placeholder="Your Name" required />
+                <input
+                  type="email"
+                  name="email"
+                  placeholder="Your Email"
+                  required
+                />
+                <textarea
+                  name="Message"
+                  rows="6"
+                  placeholder="Your Message"
+                ></textarea>
+                <button type="submit" class="btn1 bg-black">
+                  <span>Submit</span>
+                </button>
+              </form>
+              <span id="msg"></span>
+            </div>
+          </div>
+        </div>
+        
+      <div class="copyright">
+        <p>Copyright &#169;Jay Agola</p>
+      </div>
+      </div>
+  
+      
+
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
+    <script src="scripts.js"></script>
+</body>
+</html>
