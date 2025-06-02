@@ -510,9 +510,9 @@ form textarea {
     margin-top: 50px;
 }
 /* home in small */
-/* nav .fas {
+nav .fas {
     display: none;
-} */
+}
 
 @media only screen and (max-width: 1124px) {
     #header {
