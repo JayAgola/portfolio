@@ -294,10 +294,80 @@ body header .container .text a {
 }
 
 
-/* ---------- About / Education ---------- */
 #about {
     padding: 80px 0;
-    background-color: #dcdcdc;
+    background-color: #dcdcdc
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.about-1 {
+    flex-basis: 35%;
+
+}
+
+.top-main {
+    width: 100%;
+    border-radius: 15px;
+}
+
+.about-2 {
+    flex-basis: 60%;
+    opacity: 0;
+    transform: translateX(-50px);
+    animation: moveLeft 0.5s linear forwards;
+    animation-delay: .5s;
+}
+
+
+@keyframes moveLeft {
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+
+}
+
+.about-2 p {
+    margin-top: 20px;
+}
+
+.about-title {
+    font-size: 60px;
+    font-weight: 600;
+}
+
+/* Teb button */
+.tab-title {
+    display: flex;
+    margin: 20px 0 40px;
+}
+
+.tab-links {
+    margin-right: 50px;
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+    position: relative;
+}
+
+.tab-links::after {
+    content: '';
+    width: 0;
+    height: 3px;
+    background: #f69206;
+    position: absolute;
+    left: 0;
+    bottom: -8px;
+    transition: 0.5s;
+}
+
+.tab-links.active-link::after {
+    width: 50%;
 }
 
 .tab-contents ul li {
@@ -312,78 +382,73 @@ body header .container .text a {
     margin: 7px 0;
 }
 
-/* ---------- Experience ---------- */
-#experience {
-    background-color: #dcdcdc;
-    padding-top: 80px;
-    padding-bottom: 80px;
+.tab-contents {
+    display: none;
 }
 
-#experience .container h1 {
-    font-size: 48px;
-    font-weight: 600;
-    margin-bottom: 40px;
+.tab-contents.active-tab {
+    display: block;
 }
 
-#experience h3 {
-    font-size: 24px;
-    font-weight: 500;
-    margin-bottom: 10px;
+/* Skill */
+#skill {
+    padding: 30px 0;
+    margin: 50px 0 100px;
 }
 
-#experience ul {
-    margin-left: 20px;
-    margin-top: 10px;
-}
-
-#experience ul li {
-    margin-bottom: 8px;
-}
-
-/* ---------- Portfolio / Projects ---------- */
-#portfolio {
-    padding-top: 80px;
-    padding-bottom: 80px;
-    background-color: #ffffff;
-}
-
-#portfolio .container h1 {
-    font-size: 48px;
-    font-weight: 600;
-    margin-bottom: 40px;
-}
-
-.project-list {
+.skill-list {
     display: grid;
-    grid-template-columns: 1fr;
-    gap: 40px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-gap: 40px;
+    margin-top: 70px;
 }
 
-.project-item h3 {
-    font-size: 28px;
+.skill-list div {
+    background: rgb(77, 77, 77);
+    color: white;
+    padding: 40px;
+    font-size: 13px;
+    font-weight: 300;
+    border-radius: 10px;
+    transition: background 0.5s, transform 0.5s, color 0.5s;
+}
+
+.skill-list div i {
+    font-size: 50px;
+    margin-bottom: 30px;
+}
+
+.skill-list div h2 {
+    font-size: 30px;
     font-weight: 500;
+    margin-bottom: 15px;
 }
 
-.project-item h3 a {
+.skill-list div a {
     text-decoration: none;
-    color: #262626;
-    transition: color 0.3s;
+    color: white;
+    font-size: 12px;
+    margin-top: 20px;
+    display: inline-block;
 }
 
-.project-item h3 a:hover {
-    color: #f69206;
+.skill-list div:hover {
+    background: #f69206;
+    color: black;
+    transform: translateY(-10px);
 }
-
-.project-item p {
-    font-size: 16px;
-    line-height: 1.6;
-    margin-top: 8px;
-}
-
-/* ---------- Contact (unchanged) ---------- */
+/* contact */
 #contact {
     background: #dcdcdc;
     padding-top: 150px;
+}
+
+.contactleft {
+    flex-basis: 35%;
+}
+
+.contactright {
+    flex-basis: 60%;
 }
 
 .contactleft p {
@@ -395,7 +460,7 @@ body header .container .text a {
     margin-right: 15px;
     font-size: 25px;
 }
-
+/* icons */
 .social-icon {
     margin-top: 30px;
 }
@@ -414,6 +479,15 @@ body header .container .text a {
     transform: translateY(-5px);
 }
 
+/* form */
+.contactleft .btn {
+    margin-top: 2rem;
+}
+
+.contactright form {
+    width: 100%;
+}
+
 form input,
 form textarea {
     width: 100%;
@@ -426,13 +500,7 @@ form textarea {
     font-size: 18px;
     border-radius: 4px;
 }
-
-#msg {
-    color: #f69206;
-    margin-top: 40px;
-    display: block;
-}
-
+/* copy right */
 .copyright {
     width: 100%;
     text-align: center;
