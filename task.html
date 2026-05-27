@@ -1,0 +1,547 @@
+
+<h2 class="sr-only">365-Day AI Business OS Tracker — daily tasks, scores, carry-forward, and growth analytics</h2>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); background: transparent; }
+.app { max-width: 390px; margin: 0 auto; padding: 0 0 80px; }
+.header { padding: 20px 16px 12px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.header-top { display: flex; justify-content: space-between; align-items: flex-start; }
+.header-title { font-size: 18px; font-weight: 500; color: var(--color-text-primary); }
+.header-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+.day-badge { background: var(--color-background-info); color: var(--color-text-info); font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: var(--border-radius-md); }
+.score-strip { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; padding: 12px 16px; }
+.score-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 12px; }
+.score-label { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 3px; }
+.score-val { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+.score-val span { font-size: 12px; color: var(--color-text-secondary); font-weight: 400; }
+.progress-bar-wrap { padding: 0 16px 4px; }
+.progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--color-text-secondary); margin-bottom: 5px; }
+.progress-track { height: 6px; background: var(--color-background-secondary); border-radius: 99px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 99px; background: #1D9E75; transition: width 0.4s; }
+.nav-tabs { display: flex; padding: 10px 16px 0; gap: 8px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.tab { font-size: 13px; padding: 6px 12px; border-radius: var(--border-radius-md) var(--border-radius-md) 0 0; cursor: pointer; color: var(--color-text-secondary); border: 0.5px solid transparent; border-bottom: none; background: transparent; }
+.tab.active { color: var(--color-text-primary); background: var(--color-background-primary); border-color: var(--color-border-tertiary); border-bottom: 0.5px solid var(--color-background-primary); position: relative; z-index: 1; margin-bottom: -0.5px; }
+.section { padding: 14px 16px; }
+.day-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.day-nav-btn { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; color: var(--color-text-primary); }
+.day-nav-btn:hover { background: var(--color-background-tertiary); }
+.day-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+.day-date { font-size: 11px; color: var(--color-text-secondary); text-align: center; margin-top: 1px; }
+.phase-pill { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 99px; margin-bottom: 10px; }
+.phase-1 { background: #E6F1FB; color: #185FA5; }
+.phase-2 { background: #E1F5EE; color: #0F6E56; }
+.phase-3 { background: #FAEEDA; color: #854F0B; }
+.phase-4 { background: #EEEDFE; color: #534AB7; }
+.task-list { display: flex; flex-direction: column; gap: 8px; }
+.task-item { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 10px 12px; display: flex; align-items: flex-start; gap: 10px; cursor: pointer; transition: border-color 0.15s; }
+.task-item:hover { border-color: var(--color-border-secondary); }
+.task-item.done { opacity: 0.6; }
+.task-item.carried { border-left: 2.5px solid #E24B4A; }
+.task-check { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--color-border-primary); flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; font-size: 11px; transition: all 0.15s; }
+.task-item.done .task-check { background: #1D9E75; border-color: #1D9E75; color: white; }
+.task-body { flex: 1; min-width: 0; }
+.task-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); line-height: 1.3; }
+.task-item.done .task-name { text-decoration: line-through; color: var(--color-text-secondary); }
+.task-meta { display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap; align-items: center; }
+.task-tag { font-size: 10px; padding: 1px 7px; border-radius: 99px; font-weight: 500; }
+.tag-build { background: #E6F1FB; color: #185FA5; }
+.tag-learn { background: #EAF3DE; color: #3B6D11; }
+.tag-client { background: #FAEEDA; color: #854F0B; }
+.tag-content { background: #EEEDFE; color: #534AB7; }
+.tag-habit { background: #FAECE7; color: #993C1D; }
+.task-pts { font-size: 10px; color: var(--color-text-secondary); }
+.carried-badge { font-size: 9px; color: #A32D2D; background: #FCEBEB; padding: 1px 6px; border-radius: 99px; }
+.daily-score-display { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 14px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+.dsd-label { font-size: 12px; color: var(--color-text-secondary); }
+.dsd-score { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+.dsd-max { font-size: 12px; color: var(--color-text-secondary); }
+.dsd-pct { font-size: 12px; font-weight: 500; color: #1D9E75; margin-top: 1px; }
+.complete-btn { width: 100%; padding: 11px; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-lg); background: transparent; font-size: 14px; font-weight: 500; color: var(--color-text-primary); cursor: pointer; margin-top: 12px; }
+.complete-btn:hover { background: var(--color-background-secondary); }
+.analytics-section { padding: 14px 16px; }
+.section-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 10px; }
+.streak-cards { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 8px; margin-bottom: 14px; }
+.streak-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 12px; }
+.streak-num { font-size: 24px; font-weight: 500; }
+.streak-label { font-size: 11px; color: var(--color-text-secondary); margin-top: 1px; }
+.weekly-bars { display: flex; gap: 6px; align-items: flex-end; height: 60px; margin-bottom: 4px; }
+.week-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.week-bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 3px; transition: height 0.3s; }
+.week-label { font-size: 9px; color: var(--color-text-secondary); }
+.growth-list { display: flex; flex-direction: column; gap: 7px; }
+.growth-item { display: flex; align-items: center; gap: 10px; }
+.growth-name { font-size: 12px; color: var(--color-text-secondary); min-width: 80px; }
+.growth-track { flex: 1; height: 6px; background: var(--color-background-secondary); border-radius: 99px; overflow: hidden; }
+.growth-fill { height: 100%; border-radius: 99px; }
+.growth-pct { font-size: 11px; font-weight: 500; min-width: 32px; text-align: right; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 10px; }
+.cal-day { aspect-ratio: 1; border-radius: 4px; font-size: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.cal-empty { background: transparent; }
+.cal-future { background: var(--color-background-secondary); color: var(--color-text-secondary); }
+.cal-great { background: #1D9E75; color: white; }
+.cal-good { background: #5DCAA5; color: white; }
+.cal-partial { background: #9FE1CB; color: #085041; }
+.cal-miss { background: #F0997B; color: #4A1B0C; }
+.cal-today { outline: 1.5px solid #378ADD; outline-offset: -1.5px; }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.add-task-area { padding: 14px 16px; }
+.add-input { width: 100%; padding: 9px 12px; font-size: 13px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); background: var(--color-background-primary); color: var(--color-text-primary); margin-bottom: 8px; }
+.add-row { display: flex; gap: 8px; }
+.add-select { flex: 1; padding: 7px 10px; font-size: 12px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); background: var(--color-background-primary); color: var(--color-text-primary); }
+.add-btn { padding: 7px 14px; font-size: 12px; font-weight: 500; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); background: transparent; color: var(--color-text-primary); cursor: pointer; white-space: nowrap; }
+.add-btn:hover { background: var(--color-background-secondary); }
+.motivational { padding: 12px 16px; border-top: 0.5px solid var(--color-border-tertiary); }
+.quote-box { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 14px; font-size: 12px; color: var(--color-text-secondary); font-style: italic; line-height: 1.5; }
+</style>
+
+<div class="app">
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="header-title">AI Business OS</div>
+      <div class="header-sub">365-Day Execution Tracker</div>
+    </div>
+    <div class="day-badge" id="topDayBadge">Day 1</div>
+  </div>
+</div>
+
+<div class="score-strip">
+  <div class="score-card">
+    <div class="score-label">Today's score</div>
+    <div class="score-val" id="todayScoreDisp">0 <span>/ 100</span></div>
+  </div>
+  <div class="score-card">
+    <div class="score-label">Overall progress</div>
+    <div class="score-val" id="overallPct">0<span>%</span></div>
+  </div>
+  <div class="score-card">
+    <div class="score-label">Day streak 🔥</div>
+    <div class="score-val" id="streakDisp">0 <span>days</span></div>
+  </div>
+  <div class="score-card">
+    <div class="score-label">Tasks carried</div>
+    <div class="score-val" id="carriedDisp">0 <span>total</span></div>
+  </div>
+</div>
+
+<div class="progress-bar-wrap">
+  <div class="progress-label"><span>Year journey</span><span id="yearPctLabel">0 / 365 days</span></div>
+  <div class="progress-track"><div class="progress-fill" id="yearBar" style="width:0%"></div></div>
+</div>
+
+<div class="nav-tabs">
+  <button class="tab active" onclick="switchTab('today')">Today</button>
+  <button class="tab" onclick="switchTab('analytics')">Analytics</button>
+  <button class="tab" onclick="switchTab('calendar')">Calendar</button>
+</div>
+
+<div id="tab-today" class="tab-content active">
+  <div class="section">
+    <div class="day-nav">
+      <button class="day-nav-btn" onclick="changeDay(-1)"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+      <div style="text-align:center">
+        <div class="day-title" id="dayTitle">Day 1</div>
+        <div class="day-date" id="dayDate"></div>
+      </div>
+      <button class="day-nav-btn" onclick="changeDay(1)"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+    </div>
+    <div class="phase-pill" id="phasePill">Phase 1 — Foundation</div>
+    <div class="daily-score-display">
+      <div><div class="dsd-label">Day score</div><div class="dsd-score" id="dayScore">0 <span class="dsd-max">/ 100</span></div></div>
+      <div style="text-align:right"><div class="dsd-label">Completed</div><div class="dsd-pct" id="completedPct">0%</div></div>
+    </div>
+    <div class="task-list" id="taskList"></div>
+    <div class="add-task-area" style="padding: 10px 0 0;">
+      <input class="add-input" id="newTaskInput" placeholder="Add a custom task for today..." />
+      <div class="add-row">
+        <select class="add-select" id="newTaskTag">
+          <option value="build">Build</option>
+          <option value="learn">Learn</option>
+          <option value="client">Client</option>
+          <option value="content">Content</option>
+          <option value="habit">Habit</option>
+        </select>
+        <select class="add-select" id="newTaskPts">
+          <option value="5">5 pts</option>
+          <option value="10" selected>10 pts</option>
+          <option value="15">15 pts</option>
+          <option value="20">20 pts</option>
+        </select>
+        <button class="add-btn" onclick="addCustomTask()"><i class="ti ti-plus" aria-hidden="true"></i> Add</button>
+      </div>
+    </div>
+    <button class="complete-btn" onclick="finishDay()"><i class="ti ti-check" aria-hidden="true"></i> End day — carry incomplete tasks</button>
+  </div>
+  <div class="motivational"><div class="quote-box" id="quoteBox">Execute daily. Build systems. Stay consistent.</div></div>
+</div>
+
+<div id="tab-analytics" class="tab-content">
+  <div class="analytics-section">
+    <div class="section-title">Weekly performance</div>
+    <div class="weekly-bars" id="weeklyBars"></div>
+    <div style="display:flex; gap:6px; margin-bottom:16px;" id="weeklyLabels"></div>
+    <div class="section-title">Category breakdown</div>
+    <div class="growth-list" id="growthList"></div>
+    <div style="margin-top:14px">
+      <div class="section-title">Streak stats</div>
+      <div class="streak-cards">
+        <div class="streak-card"><div class="streak-num" id="curStreak" style="color:#1D9E75">0</div><div class="streak-label">Current streak</div></div>
+        <div class="streak-card"><div class="streak-num" id="bestStreak" style="color:#185FA5">0</div><div class="streak-label">Best streak</div></div>
+        <div class="streak-card"><div class="streak-num" id="totalDone">0</div><div class="streak-label">Tasks done</div></div>
+        <div class="streak-card"><div class="streak-num" id="avgScore">0</div><div class="streak-label">Avg daily score</div></div>
+      </div>
+    </div>
+    <button class="complete-btn" onclick="sendPrompt('Analyze my 365-day AI business OS progress and give me specific improvement advice based on weak categories')">Get AI analysis ↗</button>
+  </div>
+</div>
+
+<div id="tab-calendar" class="tab-content">
+  <div class="analytics-section">
+    <div class="section-title">Year progress heatmap</div>
+    <div style="display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap;">
+      <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--color-text-secondary)"><span style="width:10px;height:10px;border-radius:2px;background:#1D9E75;display:inline-block"></span>≥80%</span>
+      <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--color-text-secondary)"><span style="width:10px;height:10px;border-radius:2px;background:#5DCAA5;display:inline-block"></span>60–79%</span>
+      <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--color-text-secondary)"><span style="width:10px;height:10px;border-radius:2px;background:#9FE1CB;display:inline-block"></span>30–59%</span>
+      <span style="display:flex;align-items:center;gap:4px;font-size:10px;color:var(--color-text-secondary)"><span style="width:10px;height:10px;border-radius:2px;background:#F0997B;display:inline-block"></span>&lt;30%</span>
+    </div>
+    <div style="display:flex;gap:4px;margin-bottom:4px;"  id="calDayLabels"></div>
+    <div class="calendar-grid" id="calendarGrid"></div>
+    <div style="font-size:11px;color:var(--color-text-secondary);margin-top:4px;" id="calInfo">Tap a day to navigate to it</div>
+  </div>
+</div>
+
+</div>
+
+<script>
+const TASK_DB = {
+  phase1: [
+    {id:'p1_1',name:'Set up n8n locally + run first workflow',tag:'build',pts:20},
+    {id:'p1_2',name:'Study LangGraph basics — 1 tutorial',tag:'learn',pts:15},
+    {id:'p1_3',name:'Update LinkedIn headline to AI Growth Systems Engineer',tag:'client',pts:10},
+    {id:'p1_4',name:'Post 1 AI insight on LinkedIn/X',tag:'content',pts:10},
+    {id:'p1_5',name:'6–8 AM deep work block (no phone)',tag:'habit',pts:10},
+    {id:'p1_6',name:'Define your first AI freelance service offer',tag:'client',pts:15},
+    {id:'p1_7',name:'Review 3 competitor AI automation profiles',tag:'learn',pts:10},
+    {id:'p1_8',name:'Write down top 3 target client industries',tag:'client',pts:10},
+  ],
+  phase2: [
+    {id:'p2_1',name:'Build MVP: AI Shorts Generator (topic → script)',tag:'build',pts:20},
+    {id:'p2_2',name:'Integrate ElevenLabs API for voiceover',tag:'build',pts:20},
+    {id:'p2_3',name:'Send 5 cold DMs to potential AI clients',tag:'client',pts:15},
+    {id:'p2_4',name:'Publish YouTube/Instagram short about AI automation',tag:'content',pts:15},
+    {id:'p2_5',name:'Study RAG systems — implement basic retrieval',tag:'learn',pts:15},
+    {id:'p2_6',name:'Create productized service landing page draft',tag:'client',pts:10},
+    {id:'p2_7',name:'7–11 PM client work / SaaS build block',tag:'habit',pts:10},
+    {id:'p2_8',name:'Track weekly revenue / leads in spreadsheet',tag:'habit',pts:5},
+  ],
+  phase3: [
+    {id:'p3_1',name:'Build trend discovery agent (n8n + web scrape)',tag:'build',pts:20},
+    {id:'p3_2',name:'Add script agent → voice agent pipeline',tag:'build',pts:20},
+    {id:'p3_3',name:'Onboard first paying client for AI content system',tag:'client',pts:20},
+    {id:'p3_4',name:'Post case study — "How I built X automation"',tag:'content',pts:15},
+    {id:'p3_5',name:'Deploy MVP to Vercel / Railway',tag:'build',pts:15},
+    {id:'p3_6',name:'Study Supabase + vector DB integration',tag:'learn',pts:10},
+    {id:'p3_7',name:'Morning review: goals → priorities → execute',tag:'habit',pts:5},
+    {id:'p3_8',name:'Weekly outreach: 10 new prospects contacted',tag:'client',pts:15},
+  ],
+  phase4: [
+    {id:'p4_1',name:'Add approval dashboard to content pipeline',tag:'build',pts:20},
+    {id:'p4_2',name:'Integrate YouTube + Instagram upload APIs',tag:'build',pts:20},
+    {id:'p4_3',name:'Launch SaaS waitlist page for AI Creator OS',tag:'client',pts:15},
+    {id:'p4_4',name:'Record & publish tutorial on AI agent system',tag:'content',pts:15},
+    {id:'p4_5',name:'Research pricing strategy — ₹1999 vs ₹9999/mo',tag:'learn',pts:10},
+    {id:'p4_6',name:'10 min journaling: reflect on week + adjust plan',tag:'habit',pts:10},
+    {id:'p4_7',name:'Reach out to 3 potential agency partners',tag:'client',pts:10},
+    {id:'p4_8',name:'Measure analytics: posts, leads, revenue',tag:'habit',pts:10},
+  ]
+};
+
+const QUOTES = [
+  "Build systems, not just features. Systems compound.",
+  "Clients pay for outcomes, not effort. Automate the effort.",
+  "Every day you ship is a day ahead of those who planned.",
+  "Your content is your marketing. Post what you build.",
+  "₹1 crore is 365 days of consistent, focused execution.",
+  "The AI you build today is the leverage you have tomorrow.",
+  "Done is better than perfect. Ship, then iterate.",
+  "Freelancing funds the dream. SaaS is the dream.",
+  "n8n + OpenAI + you = a one-person automation agency.",
+  "Your full-time job is the runway. Use it wisely.",
+];
+
+let state = { currentDay: 1, days: {}, totalDays: 365 };
+
+function getPhase(day) {
+  if (day <= 90) return 1;
+  if (day <= 180) return 2;
+  if (day <= 270) return 3;
+  return 4;
+}
+
+function getPhaseLabel(phase) {
+  return ['','Phase 1 — Foundation (days 1–90)','Phase 2 — MVP & Clients (days 91–180)','Phase 3 — Scale Systems (days 181–270)','Phase 4 — SaaS Launch (days 271–365)'][phase];
+}
+
+function getPhaseClass(phase) { return 'phase-' + phase; }
+
+function getDayTasks(day) {
+  const phase = getPhase(day);
+  const key = 'phase' + phase;
+  const baseTasks = TASK_DB[key].map(t => ({ ...t, done: false, carried: false }));
+  const saved = state.days[day];
+  if (!saved) return baseTasks;
+  return baseTasks.map(t => {
+    const s = saved.tasks.find(x => x.id === t.id);
+    return s ? { ...t, done: s.done, carried: s.carried } : t;
+  }).concat((saved.custom || []).map(t => ({ ...t })));
+}
+
+function saveDayTasks(day, tasks) {
+  if (!state.days[day]) state.days[day] = {};
+  state.days[day].tasks = tasks.map(t => ({ id: t.id, done: t.done, carried: t.carried || false }));
+  state.days[day].custom = tasks.filter(t => t.custom).map(t => ({ ...t }));
+  computeDayScore(day);
+  saveState();
+}
+
+function computeDayScore(day) {
+  const tasks = getDayTasks(day);
+  const total = tasks.reduce((a, t) => a + t.pts, 0);
+  const done = tasks.filter(t => t.done).reduce((a, t) => a + t.pts, 0);
+  const score = total > 0 ? Math.round((done / total) * 100) : 0;
+  if (!state.days[day]) state.days[day] = {};
+  state.days[day].score = score;
+  state.days[day].totalPts = total;
+  state.days[day].donePts = done;
+  return score;
+}
+
+function saveState() { try { localStorage.setItem('aiOS365', JSON.stringify(state)); } catch(e) {} }
+function loadState() { try { const s = localStorage.getItem('aiOS365'); if (s) state = JSON.parse(s); } catch(e) {} }
+
+function renderTasks() {
+  const tasks = getDayTasks(state.currentDay);
+  const list = document.getElementById('taskList');
+  list.innerHTML = '';
+  tasks.forEach((task, idx) => {
+    const div = document.createElement('div');
+    div.className = 'task-item' + (task.done ? ' done' : '') + (task.carried ? ' carried' : '');
+    const tagClass = 'tag-' + task.tag;
+    div.innerHTML = `
+      <div class="task-check">${task.done ? '<i class="ti ti-check" style="font-size:11px" aria-hidden="true"></i>' : ''}</div>
+      <div class="task-body">
+        <div class="task-name">${task.name}</div>
+        <div class="task-meta">
+          <span class="task-tag ${tagClass}">${task.tag}</span>
+          <span class="task-pts">${task.pts} pts</span>
+          ${task.carried ? '<span class="carried-badge">carried over</span>' : ''}
+        </div>
+      </div>
+    `;
+    div.onclick = () => toggleTask(idx);
+    list.appendChild(div);
+  });
+  updateDayScore();
+}
+
+function toggleTask(idx) {
+  const tasks = getDayTasks(state.currentDay);
+  tasks[idx].done = !tasks[idx].done;
+  saveDayTasks(state.currentDay, tasks);
+  renderTasks();
+  updateHeader();
+}
+
+function updateDayScore() {
+  const tasks = getDayTasks(state.currentDay);
+  const total = tasks.reduce((a, t) => a + t.pts, 0);
+  const done = tasks.filter(t => t.done).reduce((a, t) => a + t.pts, 0);
+  const score = total > 0 ? Math.round((done / total) * 100) : 0;
+  const completedCount = tasks.filter(t => t.done).length;
+  document.getElementById('dayScore').innerHTML = `${done} <span class="dsd-max">/ ${total} pts</span>`;
+  document.getElementById('completedPct').textContent = score + '%';
+  document.getElementById('todayScoreDisp').innerHTML = `${score} <span>/ 100</span>`;
+  return score;
+}
+
+function updateHeader() {
+  const day = state.currentDay;
+  document.getElementById('topDayBadge').textContent = 'Day ' + day;
+  document.getElementById('dayTitle').textContent = 'Day ' + day;
+  const phase = getPhase(day);
+  const pill = document.getElementById('phasePill');
+  pill.textContent = getPhaseLabel(phase);
+  pill.className = 'phase-pill ' + getPhaseClass(phase);
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - (day - 1));
+  document.getElementById('dayDate').textContent = startDate.toLocaleDateString('en-IN', { weekday:'short', month:'short', day:'numeric' });
+  const pct = Math.round((day / 365) * 100);
+  document.getElementById('yearBar').style.width = pct + '%';
+  document.getElementById('yearPctLabel').textContent = day + ' / 365 days';
+  document.getElementById('overallPct').innerHTML = `${pct}<span>%</span>`;
+  const score = computeStreak();
+  document.getElementById('streakDisp').innerHTML = `${score.current} <span>days</span>`;
+  let carried = 0;
+  Object.values(state.days).forEach(d => { if (d && d.tasks) carried += d.tasks.filter(t => t.carried).length; });
+  document.getElementById('carriedDisp').innerHTML = `${carried} <span>total</span>`;
+  document.getElementById('quoteBox').textContent = QUOTES[day % QUOTES.length];
+}
+
+function computeStreak() {
+  let current = 0, best = 0, tmp = 0;
+  for (let d = 1; d < state.currentDay; d++) {
+    const sc = (state.days[d] && state.days[d].score) || 0;
+    if (sc >= 50) { tmp++; if (tmp > best) best = tmp; } else tmp = 0;
+  }
+  current = tmp;
+  return { current, best };
+}
+
+function changeDay(delta) {
+  const nd = state.currentDay + delta;
+  if (nd < 1 || nd > 365) return;
+  state.currentDay = nd;
+  saveState();
+  renderTasks();
+  updateHeader();
+  updateAnalytics();
+  updateCalendar();
+}
+
+function finishDay() {
+  const tasks = getDayTasks(state.currentDay);
+  const incomplete = tasks.filter(t => !t.done);
+  if (state.currentDay < 365) {
+    const nextDay = state.currentDay + 1;
+    if (!state.days[nextDay]) state.days[nextDay] = { tasks: [], custom: [] };
+    if (!state.days[nextDay].custom) state.days[nextDay].custom = [];
+    incomplete.forEach(t => {
+      if (!state.days[nextDay].tasks) state.days[nextDay].tasks = [];
+      if (!state.days[nextDay].custom) state.days[nextDay].custom = [];
+      const carried = { ...t, done: false, carried: true };
+      if (t.custom) { if (!state.days[nextDay].custom.find(x => x.id === t.id)) state.days[nextDay].custom.push(carried); }
+      else { if (!state.days[nextDay].tasks.find(x => x.id === t.id)) state.days[nextDay].tasks.push(carried); }
+    });
+  }
+  computeDayScore(state.currentDay);
+  saveState();
+  state.currentDay = Math.min(state.currentDay + 1, 365);
+  saveState();
+  renderTasks();
+  updateHeader();
+  updateAnalytics();
+  updateCalendar();
+}
+
+function addCustomTask() {
+  const name = document.getElementById('newTaskInput').value.trim();
+  if (!name) return;
+  const tag = document.getElementById('newTaskTag').value;
+  const pts = parseInt(document.getElementById('newTaskPts').value);
+  const tasks = getDayTasks(state.currentDay);
+  const id = 'custom_' + Date.now();
+  tasks.push({ id, name, tag, pts, done: false, carried: false, custom: true });
+  if (!state.days[state.currentDay]) state.days[state.currentDay] = { tasks: [], custom: [] };
+  if (!state.days[state.currentDay].custom) state.days[state.currentDay].custom = [];
+  state.days[state.currentDay].custom.push({ id, name, tag, pts, done: false, carried: false, custom: true });
+  saveState();
+  document.getElementById('newTaskInput').value = '';
+  renderTasks();
+  updateHeader();
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => { t.classList.toggle('active', ['today','analytics','calendar'][i] === tab); });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'analytics') updateAnalytics();
+  if (tab === 'calendar') updateCalendar();
+}
+
+function updateAnalytics() {
+  const bars = document.getElementById('weeklyBars');
+  const labels = document.getElementById('weeklyLabels');
+  bars.innerHTML = ''; labels.innerHTML = '';
+  const days = ['M','T','W','T','F','S','S'];
+  const colors = ['#1D9E75','#5DCAA5','#9FE1CB','#FAC775','#F0997B','#E24B4A','#378ADD'];
+  for (let i = 0; i < 7; i++) {
+    const d = state.currentDay - 6 + i;
+    const sc = (d > 0 && state.days[d] && state.days[d].score) ? state.days[d].score : 0;
+    const wrap = document.createElement('div'); wrap.className = 'week-bar-wrap';
+    const bar = document.createElement('div'); bar.className = 'week-bar';
+    bar.style.height = Math.max(sc * 0.55, 3) + 'px';
+    bar.style.background = sc >= 80 ? '#1D9E75' : sc >= 50 ? '#5DCAA5' : sc > 0 ? '#FAC775' : 'var(--color-background-secondary)';
+    const lbl = document.createElement('div'); lbl.className = 'week-label'; lbl.textContent = d > 0 ? days[i] : '—';
+    const pts = document.createElement('div'); pts.style.cssText = 'font-size:9px;color:var(--color-text-secondary);';
+    pts.textContent = d > 0 && sc > 0 ? sc : '';
+    wrap.appendChild(bar); wrap.appendChild(lbl); wrap.appendChild(pts);
+    bars.appendChild(wrap);
+  }
+  const catColors = { build:'#378ADD', learn:'#1D9E75', client:'#BA7517', content:'#534AB7', habit:'#993C1D' };
+  const catTotals = { build: 0, learn: 0, client: 0, content: 0, habit: 0 };
+  const catDone = { build: 0, learn: 0, client: 0, content: 0, habit: 0 };
+  for (let d = 1; d <= state.currentDay; d++) {
+    const tasks = getDayTasks(d);
+    tasks.forEach(t => {
+      if (catTotals[t.tag] !== undefined) {
+        catTotals[t.tag] += t.pts;
+        if (t.done) catDone[t.tag] += t.pts;
+      }
+    });
+  }
+  const gl = document.getElementById('growthList'); gl.innerHTML = '';
+  Object.keys(catColors).forEach(cat => {
+    const pct = catTotals[cat] > 0 ? Math.round((catDone[cat] / catTotals[cat]) * 100) : 0;
+    gl.innerHTML += `<div class="growth-item"><div class="growth-name">${cat}</div><div class="growth-track"><div class="growth-fill" style="width:${pct}%;background:${catColors[cat]}"></div></div><div class="growth-pct" style="color:${catColors[cat]}">${pct}%</div></div>`;
+  });
+  const st = computeStreak();
+  document.getElementById('curStreak').textContent = st.current;
+  document.getElementById('bestStreak').textContent = st.best;
+  let totalDone = 0, scoreSum = 0, scoreDays = 0;
+  for (let d = 1; d < state.currentDay; d++) {
+    const tasks = getDayTasks(d);
+    totalDone += tasks.filter(t => t.done).length;
+    if (state.days[d] && state.days[d].score) { scoreSum += state.days[d].score; scoreDays++; }
+  }
+  document.getElementById('totalDone').textContent = totalDone;
+  document.getElementById('avgScore').textContent = scoreDays > 0 ? Math.round(scoreSum / scoreDays) : 0;
+}
+
+function updateCalendar() {
+  const grid = document.getElementById('calendarGrid');
+  grid.innerHTML = '';
+  const labels = document.getElementById('calDayLabels');
+  labels.innerHTML = '';
+  ['M','T','W','T','F','S','S'].forEach(l => {
+    labels.innerHTML += `<div style="flex:1;text-align:center;font-size:9px;color:var(--color-text-secondary)">${l}</div>`;
+  });
+  const totalCells = 7 * Math.ceil(365 / 7);
+  for (let i = 0; i < totalCells; i++) {
+    const day = i + 1;
+    const div = document.createElement('div');
+    div.className = 'cal-day';
+    if (day > 365) { div.className += ' cal-empty'; }
+    else if (day > state.currentDay) { div.className += ' cal-future'; div.textContent = day <= 9 ? day : ''; }
+    else {
+      const sc = (state.days[day] && state.days[day].score) || 0;
+      if (sc >= 80) div.className += ' cal-great';
+      else if (sc >= 60) div.className += ' cal-good';
+      else if (sc >= 30) div.className += ' cal-partial';
+      else if (sc > 0) div.className += ' cal-miss';
+      else div.className += ' cal-future';
+      if (day === state.currentDay) div.className += ' cal-today';
+      div.title = 'Day ' + day + ': ' + sc + '%';
+      div.onclick = () => { state.currentDay = day; saveState(); switchTab('today'); renderTasks(); updateHeader(); };
+    }
+    div.style.fontSize = '8px';
+    grid.appendChild(div);
+  }
+  document.getElementById('calInfo').textContent = `Day ${state.currentDay} of 365 active`;
+}
+
+loadState();
+renderTasks();
+updateHeader();
+</script>
