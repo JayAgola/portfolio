@@ -16,8 +16,26 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px}
 
+/* SETUP SCREEN */
+#setup{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999;overflow-y:auto;padding:20px}
+.sbox{background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:36px 32px;width:420px;max-width:100%}
+.sbox h2{font-size:18px;font-weight:700;margin-bottom:6px}
+.sbox .sub{color:var(--mu);font-size:12px;margin-bottom:24px;line-height:1.6}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.field input{width:100%;padding:10px 13px;background:var(--bg3);border:1px solid var(--bd);border-radius:7px;color:var(--tx);font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none;transition:border-color .2s}
+.field input:focus{border-color:var(--or)}
+.field .hint{font-size:11px;color:var(--mu);margin-top:5px;line-height:1.5}
+.field .hint a{color:var(--or);text-decoration:none}
+.sbtn{width:100%;margin-top:6px;background:var(--or);color:#000;border:none;border-radius:8px;padding:12px;font-weight:700;font-size:14px;cursor:pointer;font-family:'Space Grotesk',sans-serif}
+.sbtn:hover{opacity:.85}
+.serr{color:var(--re);font-size:12px;margin-top:10px;min-height:16px;text-align:center}
+.step-indicator{display:flex;gap:6px;margin-bottom:22px}
+.step-dot{height:3px;flex:1;border-radius:2px;background:var(--bg4);transition:background .3s}
+.step-dot.on{background:var(--or)}
+
 /* LOCK */
-#lock{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+#lock{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:998;display:none}
 .lbox{background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:44px 36px;width:340px;text-align:center}
 .lbox h2{font-size:19px;font-weight:700;margin-bottom:6px}
 .lbox p{color:var(--mu);font-size:12px;margin-bottom:24px}
@@ -37,130 +55,157 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tx)
 /* APP */
 #app{display:none;padding-top:34px}
 .wrap{max-width:820px;margin:0 auto;padding:0 20px}
-
-/* HEADER */
 .hdr{padding:24px 0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd)}
 .hdr-l h1{font-size:20px;font-weight:700;letter-spacing:-.3px}
 .hdr-l h1 span{color:var(--or)}
 .hdr-l p{color:var(--mu);font-size:12px;margin-top:3px}
 .pbadge{font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;font-family:'JetBrains Mono',monospace;background:var(--or2);color:var(--or);border:1px solid rgba(246,146,6,.25)}
 
-/* NAV TABS */
 .tabs{display:flex;gap:4px;margin:18px 0 0;border-bottom:1px solid var(--bd);padding-bottom:0}
 .tab{padding:8px 16px;font-size:13px;font-weight:500;color:var(--mu);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .2s,border-color .2s;user-select:none}
 .tab.on{color:var(--or);border-bottom-color:var(--or)}
 .tab:hover:not(.on){color:var(--tx)}
-
-/* PANELS */
 .panel{display:none;padding:20px 0}
 .panel.on{display:block}
 
-/* STATS */
 .sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
 .sc{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:16px;text-align:center}
 .sc .v{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;color:var(--or);line-height:1}
 .sc .l{font-size:10px;color:var(--mu);margin-top:5px;text-transform:uppercase;letter-spacing:.5px}
 
-/* PROGRESS BAR */
 .pbar-wrap{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px 18px;margin-bottom:16px}
 .pbar-meta{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px;color:var(--mu)}
 .pbar-meta strong{color:var(--tx)}
 .ptrack{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
 .pfill{height:100%;background:var(--or);border-radius:3px;transition:width .4s;min-width:2px}
 
-/* CHART */
 .chart-box{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:18px;margin-bottom:16px}
 .chart-box h3{font-size:11px;color:var(--mu);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
 
-/* ── DAY NAVIGATOR ── */
 .daynav{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
-.daynav-btn{background:var(--bg3);border:1px solid var(--bd);border-radius:6px;color:var(--tx);padding:6px 10px;cursor:pointer;font-size:18px;font-weight:600;transition:background .2s;flex-shrink:0}
-.daynav-btn:hover{background:var(--bg4)}
-.daynav-btn:disabled{opacity:.3;cursor:not-allowed}
-.daynav-center{flex:1;text-align:center}
-.daynav-label{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--mu)}
-.daynav-cur{font-size:16px;font-weight:700;color:var(--or)}
-.day-jump{display:flex;align-items:center;gap:8px;margin-top:8px;justify-content:center}
-.day-jump input{width:72px;padding:6px 10px;background:var(--bg3);border:1px solid var(--bd);border-radius:6px;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:13px;text-align:center;outline:none}
-.day-jump input:focus{border-color:var(--or)}
-.day-jump button{background:var(--or);color:#000;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif}
+.dnbtn{background:var(--bg3);border:1px solid var(--bd);border-radius:6px;color:var(--tx);padding:6px 12px;cursor:pointer;font-size:20px;font-weight:600;transition:background .2s;flex-shrink:0}
+.dnbtn:hover{background:var(--bg4)}
+.dnbtn:disabled{opacity:.3;cursor:not-allowed}
+.dnc{flex:1;text-align:center}
+.dnlbl{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--mu)}
+.dncur{font-size:17px;font-weight:700;color:var(--or)}
+.jmp-row{display:flex;align-items:center;gap:8px;margin-top:8px;justify-content:center}
+.jmp-row input{width:72px;padding:6px 10px;background:var(--bg3);border:1px solid var(--bd);border-radius:6px;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:13px;text-align:center;outline:none}
+.jmp-row input:focus{border-color:var(--or)}
+.jmp-row button{background:var(--or);color:#000;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer}
 
-/* TASK SECTION HEADER */
 .tsec{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .tsec h2{font-size:16px;font-weight:600}
-.tsec .dchip{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--bg3);border:1px solid var(--bd);border-radius:16px;padding:3px 10px;color:var(--mu)}
+.dchip{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--bg3);border:1px solid var(--bd);border-radius:16px;padding:3px 10px;color:var(--mu)}
 
-/* VIEWING BANNER */
-.view-banner{background:var(--bl);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#93c5fd;display:flex;align-items:center;justify-content:space-between}
-.view-banner button{background:transparent;border:1px solid rgba(147,197,253,.3);border-radius:5px;color:#93c5fd;font-size:11px;padding:3px 10px;cursor:pointer}
+.vbanner{background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.22);border-radius:8px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#93c5fd;display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.vbanner button{background:transparent;border:1px solid rgba(147,197,253,.3);border-radius:5px;color:#93c5fd;font-size:11px;padding:3px 10px;cursor:pointer;white-space:nowrap}
 
-/* TASKS */
 .task{background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:7px;cursor:pointer;transition:border-color .2s}
 .task:hover{border-color:var(--bd2)}
 .task.done{opacity:.5}
 .task.done .ttext{text-decoration:line-through;color:var(--mu)}
 .task.overdue{border-left:3px solid var(--re);border-radius:0 8px 8px 0}
 .task.custom-t{border-left:3px solid var(--bl);border-radius:0 8px 8px 0}
-.task.viewing{cursor:default}
-.task.viewing:hover{border-color:var(--bd)}
+.task.ro{cursor:default}
+.task.ro:hover{border-color:var(--bd)}
 .tchk{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--bd);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .2s,border-color .2s}
 .task.done .tchk{background:var(--or);border-color:var(--or)}
-.task.viewing .tchk{pointer-events:none;opacity:.6}
 .tchk svg{display:none}
 .task.done .tchk svg{display:block}
 .ttext{flex:1;font-size:13px;line-height:1.45}
 .ttag{font-size:10px;border-radius:4px;padding:2px 7px;flex-shrink:0}
-.ttag.overdue{color:var(--re);background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2)}
-.ttag.custom{color:#93c5fd;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2)}
+.ttag.ov{color:var(--re);background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2)}
+.ttag.cu{color:#93c5fd;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2)}
 .tpts{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--or);background:var(--or2);border-radius:4px;padding:2px 7px;flex-shrink:0}
-.del-btn{background:transparent;border:none;color:var(--re);cursor:pointer;font-size:16px;padding:2px 4px;opacity:.6;flex-shrink:0}
-.del-btn:hover{opacity:1}
+.delbtn{background:transparent;border:none;color:var(--re);cursor:pointer;font-size:17px;padding:0 4px;opacity:.55;flex-shrink:0;line-height:1}
+.delbtn:hover{opacity:1}
 
-/* ADD CUSTOM TASK */
 .add-box{background:var(--bg2);border:1px dashed var(--bd2);border-radius:8px;padding:14px;margin-top:10px}
-.add-box h4{font-size:12px;color:var(--mu);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.add-box h4{font-size:11px;color:var(--mu);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
 .add-row{display:flex;gap:8px}
 .add-row input{flex:1;padding:9px 12px;background:var(--bg3);border:1px solid var(--bd);border-radius:7px;color:var(--tx);font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none}
 .add-row input:focus{border-color:var(--or)}
 .add-row button{background:var(--or);color:#000;border:none;border-radius:7px;padding:9px 14px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
 
-/* ADVANCE */
-.adv-btn{width:100%;margin-top:18px;background:var(--or);color:#000;border:none;border-radius:9px;padding:14px;font-weight:700;font-size:14px;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:opacity .2s}
-.adv-btn:hover{opacity:.85}
-.adv-btn:disabled{opacity:.35;cursor:not-allowed}
+.advbtn{width:100%;margin-top:18px;background:var(--or);color:#000;border:none;border-radius:9px;padding:14px;font-weight:700;font-size:14px;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:opacity .2s}
+.advbtn:hover{opacity:.85}
 .back{display:block;text-align:center;margin-top:16px;color:var(--mu);font-size:12px;text-decoration:none}
 .back:hover{color:var(--tx)}
 
-/* SPINNER */
 #ldg{text-align:center;padding:60px 0;color:var(--mu)}
-.spin{width:26px;height:26px;border:2.5px solid var(--bd);border-top-color:var(--or);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px}
-@keyframes spin{to{transform:rotate(360deg)}}
+.spin{width:26px;height:26px;border:2.5px solid var(--bd);border-top-color:var(--or);border-radius:50%;animation:sp .7s linear infinite;margin:0 auto 12px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+.cfg-link{font-size:11px;color:var(--mu);text-align:center;margin-top:16px;cursor:pointer;text-decoration:underline}
+.cfg-link:hover{color:var(--tx)}
 
 @media(max-width:580px){
   .sgrid{grid-template-columns:repeat(2,1fr)}
   .hdr{flex-direction:column;align-items:flex-start;gap:8px}
-  .tabs{overflow-x:auto}
 }
 </style>
 </head>
 <body>
 
+<!-- SETUP / CONFIG SCREEN -->
+<div id="setup">
+  <div class="sbox">
+    <div style="font-size:32px;margin-bottom:12px">⚙️</div>
+    <h2>Connect to GitHub</h2>
+    <p class="sub">Your progress is saved directly to <code>data.json</code> in your GitHub repo. One-time setup — fill this in once and it's stored in your browser for this device.</p>
+    <div class="step-indicator">
+      <div class="step-dot on"></div>
+      <div class="step-dot on"></div>
+      <div class="step-dot on"></div>
+    </div>
+
+    <div class="field">
+      <label>GitHub Username</label>
+      <input type="text" id="cfg-user" placeholder="e.g. jayshah365">
+    </div>
+    <div class="field">
+      <label>Repository Name</label>
+      <input type="text" id="cfg-repo" placeholder="e.g. mission365">
+      <div class="hint">The repo where you uploaded <code>index.html</code> and <code>data.json</code></div>
+    </div>
+    <div class="field">
+      <label>GitHub Personal Access Token</label>
+      <input type="password" id="cfg-token" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+      <div class="hint">
+        Needs <strong>Contents: Read &amp; Write</strong> permission.<br>
+        <a href="https://github.com/settings/tokens/new?scopes=repo&description=Mission365" target="_blank">Click here to create a token →</a>
+      </div>
+    </div>
+    <div class="field">
+      <label>Your Password (to lock the dashboard)</label>
+      <input type="password" id="cfg-pass" placeholder="Choose a password">
+    </div>
+
+    <button class="sbtn" onclick="setupSave()">Save & Connect</button>
+    <div class="serr" id="serr"></div>
+  </div>
+</div>
+
+<!-- LOCK SCREEN -->
 <div id="lock">
   <div class="lbox">
     <div style="font-size:36px;margin-bottom:14px">🔐</div>
     <h2>Mission 365</h2>
-    <p>Authorized access only</p>
+    <p>Enter your password to continue</p>
     <input type="password" id="pi" placeholder="••••••••" onkeydown="if(event.key==='Enter')unlock()">
     <button onclick="unlock()">Unlock Dashboard</button>
     <div class="lerr" id="lerr"></div>
   </div>
 </div>
 
+<!-- SYNC STATUS BAR -->
 <div id="sbar" class="ok">
   <div class="sdot"></div>
-  <span id="slbl">Progress saved to cloud</span>
+  <span id="slbl">Connected to GitHub</span>
 </div>
 
+<!-- MAIN APP -->
 <div id="app">
 <div class="wrap">
 
@@ -175,26 +220,23 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tx)
   <div class="tabs">
     <div class="tab on" onclick="showTab('today')">Today</div>
     <div class="tab" onclick="showTab('browse')">Browse Days</div>
-    <div class="tab" onclick="showTab('stats')">Stats & Chart</div>
+    <div class="tab" onclick="showTab('stats')">Stats &amp; Chart</div>
   </div>
 
-  <!-- TODAY PANEL -->
+  <!-- TODAY -->
   <div class="panel on" id="tab-today">
-    <div id="ldg"><div class="spin"></div>Loading your progress…</div>
+    <div id="ldg"><div class="spin"></div>Loading from GitHub…</div>
     <div id="mc" style="display:none">
-
       <div class="sgrid">
         <div class="sc"><div class="v" id="s-day">1</div><div class="l">Current Day</div></div>
         <div class="sc"><div class="v" id="s-today">0/100</div><div class="l">Today Score</div></div>
         <div class="sc"><div class="v" id="s-total">0</div><div class="l">Total Score</div></div>
         <div class="sc"><div class="v" id="s-str">0🔥</div><div class="l">Streak</div></div>
       </div>
-
       <div class="pbar-wrap">
         <div class="pbar-meta"><span>Year progress</span><strong id="ppct">0%</strong></div>
         <div class="ptrack"><div class="pfill" id="pfill" style="width:0%"></div></div>
       </div>
-
       <div class="tsec">
         <h2>Today's Tasks</h2>
         <div class="dchip" id="dchip">Day 1</div>
@@ -207,35 +249,36 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tx)
           <button onclick="addCustom()">Add</button>
         </div>
       </div>
-      <button class="adv-btn" id="advbtn" onclick="advDay()">✅ Complete Day & Move to Next</button>
+      <button class="advbtn" onclick="advDay()">✅ Complete Day &amp; Move to Next</button>
+      <p class="cfg-link" onclick="resetConfig()">⚙ Change GitHub settings</p>
       <a href="index.html" class="back">← Back to Portfolio</a>
     </div>
   </div>
 
-  <!-- BROWSE PANEL -->
+  <!-- BROWSE -->
   <div class="panel" id="tab-browse">
     <div class="daynav">
-      <button class="daynav-btn" id="bn-prev" onclick="browseNav(-1)">‹</button>
-      <div class="daynav-center">
-        <div class="daynav-label">Viewing</div>
-        <div class="daynav-cur" id="bn-label">Day 1</div>
-        <div class="day-jump">
+      <button class="dnbtn" id="bn-prev" onclick="browseNav(-1)">‹</button>
+      <div class="dnc">
+        <div class="dnlbl">Viewing</div>
+        <div class="dncur" id="bn-lbl">Day 1</div>
+        <div class="jmp-row">
           <input type="number" id="jmp" min="1" max="365" placeholder="Day #" onkeydown="if(event.key==='Enter')jumpTo()">
           <button onclick="jumpTo()">Go</button>
         </div>
       </div>
-      <button class="daynav-btn" id="bn-next" onclick="browseNav(1)">›</button>
+      <button class="dnbtn" id="bn-next" onclick="browseNav(1)">›</button>
     </div>
     <div id="browse-content"></div>
   </div>
 
-  <!-- STATS PANEL -->
+  <!-- STATS -->
   <div class="panel" id="tab-stats">
     <div class="sgrid" style="margin-top:4px">
       <div class="sc"><div class="v" id="ss-day">1</div><div class="l">Current Day</div></div>
       <div class="sc"><div class="v" id="ss-done">0</div><div class="l">Tasks Done</div></div>
       <div class="sc"><div class="v" id="ss-total">0</div><div class="l">Total Score</div></div>
-      <div class="sc"><div class="v" id="ss-avg">0</div><div class="l">Avg Daily Score</div></div>
+      <div class="sc"><div class="v" id="ss-avg">0</div><div class="l">Avg Score</div></div>
     </div>
     <div class="chart-box">
       <h3>Daily Score History</h3>
@@ -247,15 +290,13 @@ body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tx)
     </div>
   </div>
 
-</div><!-- /wrap -->
-</div><!-- /app -->
+</div>
+</div>
 
 <script>
-const SECRET="Jay@2026";
-const SK="mission365_v2";
-const MAXDAY=365;
-const MSCORE=100;
+const MAXDAY=365,MSCORE=100,LS_CFG="m365_cfg";
 
+// ── TASK DATA ──
 const allTasks=[
     { id: 1, day: 1, text: "Write down your 1-year ₹1Cr vision clearly" },
     { id: 2, day: 1, text: "Set up GitHub profile and pin 3 placeholder project repos" },
@@ -913,22 +954,112 @@ const allTasks=[
     { id: 654, day: 365, text: "Plan Year 2" },
 ];
 
+// ── STATE ──
 let S={day:1,done:[],history:{},custom:{}};
-let myChart=null;
-let browseDay=1;
+let CFG={user:"",repo:"",token:"",pass:""};
+let fileSHA="";
+let myChart=null,browseDay=1;
+let saveTimer=null;
 
+// ── CONFIG / SETUP ──
+function loadConfig(){
+  const c=localStorage.getItem(LS_CFG);
+  if(c){ try{ CFG=JSON.parse(c); return true; } catch(e){} }
+  return false;
+}
+function setupSave(){
+  const user=document.getElementById("cfg-user").value.trim();
+  const repo=document.getElementById("cfg-repo").value.trim();
+  const token=document.getElementById("cfg-token").value.trim();
+  const pass=document.getElementById("cfg-pass").value.trim();
+  const err=document.getElementById("serr");
+  if(!user||!repo||!token||!pass){err.textContent="All fields are required.";return;}
+  if(!token.startsWith("ghp_")&&!token.startsWith("github_pat_")&&!token.startsWith("gho_")){
+    err.textContent="Token should start with ghp_ or github_pat_";return;
+  }
+  CFG={user,repo,token,pass};
+  localStorage.setItem(LS_CFG,JSON.stringify(CFG));
+  err.textContent="";
+  document.getElementById("setup").style.display="none";
+  document.getElementById("lock").style.display="flex";
+}
+function resetConfig(){
+  if(!confirm("Reset GitHub connection? You'll need to enter your token again.")) return;
+  localStorage.removeItem(LS_CFG);
+  location.reload();
+}
+
+// ── LOCK ──
 function unlock(){
   const v=document.getElementById("pi").value;
-  if(v===SECRET){
+  if(v===CFG.pass){
     document.getElementById("lock").style.display="none";
     document.getElementById("app").style.display="block";
-    loadCloud();
+    initApp();
   } else {
     const e=document.getElementById("lerr");
-    e.textContent="Incorrect password. Try again.";
+    e.textContent="Incorrect password.";
     document.getElementById("pi").value="";
     setTimeout(()=>e.textContent="",3000);
   }
+}
+
+// ── GITHUB API ──
+function ghHeaders(){
+  return{"Authorization":"token "+CFG.token,"Content-Type":"application/json","Accept":"application/vnd.github.v3+json"};
+}
+function ghUrl(){
+  return"https://api.github.com/repos/"+CFG.user+"/"+CFG.repo+"/contents/data.json";
+}
+
+async function loadFromGitHub(){
+  sync("saving","Loading from GitHub…");
+  try{
+    const r=await fetch(ghUrl(),{headers:ghHeaders()});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const j=await r.json();
+    fileSHA=j.sha;
+    const decoded=JSON.parse(atob(j.content.replace(/\n/g,"")));
+    S={day:1,done:[],history:{},custom:{},...decoded};
+    sync("ok","Loaded from GitHub · "+new Date().toLocaleTimeString());
+  } catch(e){
+    sync("err","Load failed: "+e.message+". Check token & repo name.");
+  }
+}
+
+async function saveToGitHub(){
+  sync("saving","Saving to GitHub…");
+  try{
+    const content=btoa(unescape(encodeURIComponent(JSON.stringify(S,null,2))));
+    const body={message:"Mission 365 progress update",content,sha:fileSHA};
+    const r=await fetch(ghUrl(),{method:"PUT",headers:ghHeaders(),body:JSON.stringify(body)});
+    if(!r.ok){
+      const j=await r.json();
+      // If SHA conflict, re-fetch SHA and retry once
+      if(r.status===409||r.status===422){
+        const r2=await fetch(ghUrl(),{headers:ghHeaders()});
+        const j2=await r2.json();
+        fileSHA=j2.sha;
+        body.sha=fileSHA;
+        const r3=await fetch(ghUrl(),{method:"PUT",headers:ghHeaders(),body:JSON.stringify(body)});
+        if(!r3.ok) throw new Error("HTTP "+r3.status);
+        const j3=await r3.json();
+        fileSHA=j3.content.sha;
+      } else { throw new Error("HTTP "+r.status+" – "+JSON.stringify(j)); }
+    } else {
+      const j=await r.json();
+      fileSHA=j.content.sha;
+    }
+    sync("ok","Saved to GitHub · "+new Date().toLocaleTimeString());
+  } catch(e){
+    sync("err","Save failed: "+e.message);
+  }
+}
+
+// Debounced save — waits 1.2s after last action to avoid hammering API
+function debounceSave(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(saveToGitHub,1200);
 }
 
 function sync(s,m){
@@ -937,13 +1068,9 @@ function sync(s,m){
   document.getElementById("slbl").textContent=m;
 }
 
-async function loadCloud(){
-  sync("saving","Loading from cloud…");
-  try{
-    const r=await window.storage.get(SK);
-    if(r&&r.value) S={...S,...JSON.parse(r.value)};
-    sync("ok","Synced · "+new Date().toLocaleTimeString());
-  } catch(e){ sync("ok","New journey started ✨"); }
+// ── INIT ──
+async function initApp(){
+  await loadFromGitHub();
   document.getElementById("ldg").style.display="none";
   document.getElementById("mc").style.display="block";
   browseDay=S.day;
@@ -952,42 +1079,31 @@ async function loadCloud(){
   renderBrowse();
 }
 
-async function saveCloud(){
-  sync("saving","Saving…");
-  try{
-    await window.storage.set(SK,JSON.stringify(S));
-    sync("ok","Saved · "+new Date().toLocaleTimeString());
-  } catch(e){ sync("err","Save failed"); }
-}
-
+// ── PHASE ──
 function phase(d){
-  if(d<=90) return{l:"Phase 1 – Freelancing",c:"#f69206"};
+  if(d<=90)  return{l:"Phase 1 – Freelancing",c:"#f69206"};
   if(d<=210) return{l:"Phase 2 – Productized",c:"#a855f7"};
   if(d<=300) return{l:"Phase 3 – SaaS Build",c:"#3b82f6"};
-  return{l:"Phase 4 – Scale & Brand",c:"#22c55e"};
+  return            {l:"Phase 4 – Scale & Brand",c:"#22c55e"};
 }
 
+// ── SCORE ──
 function tasksForDay(d){
   const base=allTasks.filter(t=>t.day===d);
   const cust=(S.custom[d]||[]).map(c=>({id:"c_"+c.id,day:d,text:c.text,custom:true}));
-  return [...base,...cust];
+  return[...base,...cust];
 }
-
 function todayScore(){
   const t=tasksForDay(S.day);
   if(!t.length) return 0;
   const pts=MSCORE/t.length;
-  const done=t.filter(t=>S.done.includes(t.id)).length;
-  return Math.round(done*pts);
+  return Math.round(t.filter(t=>S.done.includes(t.id)).length*pts);
 }
-
 function totalScore(){
   let total=0;
   for(let d=1;d<S.day;d++) total+=S.history[d]||0;
-  total+=todayScore();
-  return total;
+  return total+todayScore();
 }
-
 function streak(){
   let s=0;
   for(let d=S.day-1;d>=1;d--){
@@ -997,25 +1113,11 @@ function streak(){
   return s;
 }
 
-function showTab(id){
-  document.querySelectorAll(".tab").forEach((t,i)=>{
-    const ids=["today","browse","stats"];
-    t.classList.toggle("on",ids[i]===id);
-  });
-  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("on"));
-  document.getElementById("tab-"+id).classList.add("on");
-  if(id==="stats") updateChart();
-  if(id==="browse") renderBrowse();
-}
-
+// ── RENDER ──
 function render(){
-  const d=S.day;
-  const ts=todayScore();
-  const tot=totalScore();
-  const str=streak();
+  const d=S.day,ts=todayScore(),tot=totalScore(),str=streak();
   const pct=Math.round((d/MAXDAY)*100);
   const ph=phase(d);
-
   document.getElementById("s-day").textContent=d;
   document.getElementById("s-today").textContent=ts+"/100";
   document.getElementById("s-total").textContent=tot;
@@ -1026,44 +1128,36 @@ function render(){
   const pb=document.getElementById("pbadge");
   pb.textContent=ph.l;pb.style.color=ph.c;
   pb.style.background=ph.c+"1a";pb.style.borderColor=ph.c+"44";
-
   renderTodayTasks();
 }
 
 function renderTodayTasks(){
-  const d=S.day;
-  const list=document.getElementById("tlist");
+  const d=S.day,list=document.getElementById("tlist");
   list.innerHTML="";
-
-  const active=allTasks.filter(t=>t.day===d||(t.day<d&&!S.done.includes(t.id)));
+  const overdue=allTasks.filter(t=>t.day<d&&!S.done.includes(t.id));
   const custToday=(S.custom[d]||[]).map(c=>({id:"c_"+c.id,day:d,text:c.text,custom:true}));
-  const all=[...active,...custToday];
-
+  const all=[...allTasks.filter(t=>t.day===d),...overdue,...custToday];
   if(!all.length){
     list.innerHTML='<div style="text-align:center;color:var(--mu);padding:24px;font-size:13px">🎉 All done for today!</div>';
     return;
   }
-  all.forEach(t=>list.appendChild(makeTaskEl(t,d,false)));
+  all.forEach(t=>list.appendChild(mkTask(t,d,false)));
 }
 
-function makeTaskEl(t,viewDay,isReadOnly){
+function mkTask(t,viewDay,ro){
   const isDone=S.done.includes(t.id);
-  const isOverdue=t.day<viewDay;
-  const isCust=t.custom||String(t.id).startsWith("c_");
+  const isOv=t.day<viewDay;
+  const isCu=t.custom||String(t.id).startsWith("c_");
   const el=document.createElement("div");
-  let cls="task"+(isDone?" done":"")+(isOverdue?" overdue":"")+(isCust?" custom-t":"")+(isReadOnly?" viewing":"");
-  el.className=cls;
-  if(!isReadOnly) el.onclick=()=>toggleTask(t.id,viewDay);
-
-  const baseCount=allTasks.filter(x=>x.day===t.day).length+(S.custom[t.day]||[]).length;
-  const pts=Math.round(MSCORE/Math.max(1,baseCount));
-
+  el.className="task"+(isDone?" done":"")+(isOv?" overdue":"")+(isCu?" custom-t":"")+(ro?" ro":"");
+  if(!ro) el.onclick=()=>toggleTask(t.id,t.day);
+  const dayCount=tasksForDay(t.day).length;
+  const pts=Math.round(MSCORE/Math.max(1,dayCount));
   let tags="";
-  if(isOverdue) tags+='<span class="ttag overdue">Overdue Day '+t.day+'</span>';
-  if(isCust) tags+='<span class="ttag custom">Custom</span>';
-  const delBtn=isCust&&!isReadOnly?'<button class="del-btn" onclick="event.stopPropagation();delCustom(\"'+t.id+'\",'+t.day+')" title="Delete">×</button>':'';
-
-  el.innerHTML='<div class="tchk"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="ttext">'+esc(t.text)+'</span>'+tags+'<span class="tpts">'+pts+'pts</span>'+delBtn;
+  if(isOv) tags+='<span class="ttag ov">Overdue Day '+t.day+'</span>';
+  if(isCu) tags+='<span class="ttag cu">Custom</span>';
+  const del=isCu&&!ro?'<button class="delbtn" onclick="event.stopPropagation();delCustom(\''+t.id+'\','+t.day+')">×</button>':"";
+  el.innerHTML='<div class="tchk"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="ttext">'+esc(t.text)+'</span>'+tags+'<span class="tpts">'+pts+'pts</span>'+del;
   return el;
 }
 
@@ -1072,113 +1166,109 @@ function toggleTask(id,day){
   else S.done.push(id);
   S.history[day]=S.history[day]||0;
   if(day===S.day) S.history[S.day]=todayScore();
-  render();
-  saveCloud();
+  render();updateChart();
+  debounceSave();
 }
 
 function addCustom(){
-  const inp=document.getElementById("cinput");
-  const txt=inp.value.trim();
+  const inp=document.getElementById("cinput"),txt=inp.value.trim();
   if(!txt) return;
   const d=S.day;
   if(!S.custom[d]) S.custom[d]=[];
-  const uid=Date.now();
-  S.custom[d].push({id:uid,text:txt});
+  S.custom[d].push({id:Date.now(),text:txt});
   inp.value="";
-  render();
-  saveCloud();
+  render();debounceSave();
 }
 
 function delCustom(cid,day){
   if(!S.custom[day]) return;
-  const rawId=cid.replace("c_","");
-  S.custom[day]=S.custom[day].filter(c=>String(c.id)!==String(rawId));
+  const raw=String(cid).replace("c_","");
+  S.custom[day]=S.custom[day].filter(c=>String(c.id)!==raw);
   S.done=S.done.filter(x=>x!==cid);
-  render();
-  saveCloud();
+  render();debounceSave();
 }
 
 function advDay(){
   S.history[S.day]=todayScore();
   if(S.day<MAXDAY) S.day++;
   browseDay=S.day;
-  render();
-  updateChart();
-  saveCloud();
+  render();updateChart();renderBrowse();
+  saveToGitHub();
   document.getElementById("tlist").scrollIntoView({behavior:"smooth",block:"start"});
 }
 
-/* ── BROWSE ── */
+// ── BROWSE ──
 function renderBrowse(){
   const d=browseDay;
-  document.getElementById("bn-label").textContent="Day "+d;
+  document.getElementById("bn-lbl").textContent="Day "+d;
   document.getElementById("bn-prev").disabled=d<=1;
   document.getElementById("bn-next").disabled=d>=MAXDAY;
-
-  const isToday=d===S.day;
-  const isPast=d<S.day;
   const bc=document.getElementById("browse-content");
   bc.innerHTML="";
-
+  const isToday=d===S.day,isPast=d<S.day;
   if(!isToday){
-    const banner=document.createElement("div");
-    banner.className="view-banner";
     const score=isPast?(S.history[d]||0):"—";
-    const label=isPast?"Past day · Score: "+score+"/100":d>S.day?"Upcoming day":"";
-    banner.innerHTML='<span>'+label+'</span><button onclick="S.day=browseDay='+d+';render();showTab(\'today\')">Jump to this day</button>';
-    bc.appendChild(banner);
+    const label=isPast?"Past day · Score: "+score+"/100":d>S.day?"Upcoming day · not started yet":"";
+    const bn=document.createElement("div");
+    bn.className="vbanner";
+    bn.innerHTML='<span>'+label+'</span><button onclick="goToDay('+d+')">Set as current day</button>';
+    bc.appendChild(bn);
   }
-
-  const tasks=tasksForDay(d);
-  if(!tasks.length){
-    bc.innerHTML+='<div style="text-align:center;color:var(--mu);padding:24px;font-size:13px">No tasks for this day.</div>';
-    return;
-  }
-
   const ph=phase(d);
   const phEl=document.createElement("div");
   phEl.style.cssText="font-size:11px;color:"+ph.c+";margin-bottom:10px;font-family:'JetBrains Mono',monospace";
   phEl.textContent=ph.l+" · Day "+d+"/365";
   bc.appendChild(phEl);
-
-  tasks.forEach(t=>{
-    const el=makeTaskEl(t,d,true);
-    bc.appendChild(el);
-  });
-
-  if(!isToday){
-    const addNote=document.createElement("div");
-    addNote.className="add-box";
-    addNote.style.marginTop="10px";
-    addNote.innerHTML='<h4>+ Add custom task for Day '+d+'</h4><div class="add-row"><input type="text" id="binput" placeholder="Custom task for Day '+d+'…" onkeydown="if(event.key===\'Enter\')addCustomBrowse('+d+')"><button onclick="addCustomBrowse('+d+')">Add</button></div>';
-    bc.appendChild(addNote);
+  const tasks=tasksForDay(d);
+  if(!tasks.length){
+    bc.innerHTML+='<div style="text-align:center;color:var(--mu);padding:24px;font-size:13px">No tasks for this day.</div>';
+  } else {
+    tasks.forEach(t=>bc.appendChild(mkTask(t,d,true)));
   }
+  const addB=document.createElement("div");
+  addB.className="add-box";addB.style.marginTop="10px";
+  addB.innerHTML='<h4>+ Add custom task for Day '+d+'</h4><div class="add-row"><input type="text" id="binput" placeholder="Custom task for Day '+d+'…" onkeydown="if(event.key===\'Enter\')addCustomBrowse('+d+')"><button onclick="addCustomBrowse('+d+')">Add</button></div>';
+  bc.appendChild(addB);
+}
+
+function goToDay(d){
+  S.day=d;browseDay=d;
+  render();renderBrowse();
+  debounceSave();
+  showTab("today");
 }
 
 function addCustomBrowse(day){
-  const inp=document.getElementById("binput");
-  const txt=inp.value.trim();
+  const inp=document.getElementById("binput"),txt=inp.value.trim();
   if(!txt) return;
   if(!S.custom[day]) S.custom[day]=[];
   S.custom[day].push({id:Date.now(),text:txt});
   inp.value="";
   renderBrowse();
   if(day===S.day) render();
-  saveCloud();
+  debounceSave();
 }
 
 function browseNav(dir){
   browseDay=Math.max(1,Math.min(MAXDAY,browseDay+dir));
   renderBrowse();
 }
-
 function jumpTo(){
   const v=parseInt(document.getElementById("jmp").value);
-  if(v>=1&&v<=MAXDAY){ browseDay=v; renderBrowse(); }
+  if(v>=1&&v<=365){browseDay=v;renderBrowse();}
   document.getElementById("jmp").value="";
 }
+function showTab(id){
+  document.querySelectorAll(".tab").forEach((t,i)=>{
+    t.classList.toggle("on",["today","browse","stats"][i]===id);
+  });
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("on"));
+  document.getElementById("tab-"+id).classList.add("on");
+  if(id==="stats") updateChart();
+  if(id==="browse") renderBrowse();
+}
 
-/* ── CHART ── */
+// ── CHART ──
 function renderChart(){
   const ctx=document.getElementById("chart").getContext("2d");
   const labels=[],data=[];
@@ -1188,26 +1278,11 @@ function renderChart(){
   }
   myChart=new Chart(ctx,{
     type:"line",
-    data:{labels,datasets:[{
-      label:"Score",data,
-      borderColor:"#f69206",
-      backgroundColor:"rgba(246,146,6,0.07)",
-      borderWidth:2,fill:true,tension:.4,
-      pointRadius:data.length<=40?2:0,
-      pointHoverRadius:5,pointBackgroundColor:"#f69206"
-    }]},
-    options:{
-      responsive:true,animation:{duration:250},
-      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>" Score: "+c.parsed.y}}},
-      scales:{
-        x:{ticks:{color:"#555",font:{size:10}},grid:{color:"rgba(255,255,255,0.04)"}},
-        y:{beginAtZero:true,max:100,ticks:{color:"#555",font:{size:10}},grid:{color:"rgba(255,255,255,0.04)"}}
-      }
-    }
+    data:{labels,datasets:[{label:"Score",data,borderColor:"#f69206",backgroundColor:"rgba(246,146,6,0.07)",borderWidth:2,fill:true,tension:.4,pointRadius:data.length<=40?2:0,pointHoverRadius:5,pointBackgroundColor:"#f69206"}]},
+    options:{responsive:true,animation:{duration:250},plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>" Score: "+c.parsed.y}}},scales:{x:{ticks:{color:"#555",font:{size:10}},grid:{color:"rgba(255,255,255,0.04)"}},y:{beginAtZero:true,max:100,ticks:{color:"#555",font:{size:10}},grid:{color:"rgba(255,255,255,0.04)"}}}}
   });
   updateStatsPanel();
 }
-
 function updateChart(){
   if(!myChart) return;
   const labels=[],data=[];
@@ -1221,23 +1296,27 @@ function updateChart(){
   myChart.update();
   updateStatsPanel();
 }
-
 function updateStatsPanel(){
-  const tot=totalScore();
-  const doneCount=S.done.length;
-  const days=Math.max(1,S.day-1);
   const scores=Object.values(S.history);
   const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
   const pct=Math.round((S.day/MAXDAY)*100);
   document.getElementById("ss-day").textContent=S.day;
-  document.getElementById("ss-done").textContent=doneCount;
-  document.getElementById("ss-total").textContent=tot;
+  document.getElementById("ss-done").textContent=S.done.length;
+  document.getElementById("ss-total").textContent=totalScore();
   document.getElementById("ss-avg").textContent=avg;
   document.getElementById("spct").textContent=pct+"%";
   document.getElementById("spfill").style.width=pct+"%";
 }
 
 function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+
+// ── BOOT ──
+window.addEventListener("load",()=>{
+  if(loadConfig()){
+    document.getElementById("setup").style.display="none";
+    document.getElementById("lock").style.display="flex";
+  }
+});
 </script>
 </body>
 </html>
