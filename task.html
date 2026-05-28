@@ -1,330 +1,1243 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>365 Task Tracker</title>
-    <!-- Chart.js for progress graphs -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        :root {
-            --primary: #f69206; /* Matching your portfolio theme */
-            --bg-color: #f4f7f6;
-            --text-main: #333;
-            --card-bg: #fff;
-        }
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mission 365</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+:root{
+  --or:#f69206;--or2:rgba(246,146,6,0.13);
+  --bg:#0e0e0e;--bg2:#161616;--bg3:#1e1e1e;--bg4:#252525;
+  --bd:rgba(255,255,255,0.08);--bd2:rgba(255,255,255,0.14);
+  --tx:#f0f0f0;--mu:#777;--gr:#22c55e;--re:#ef4444;--bl:#3b82f6;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;font-size:14px}
 
-        /* Password Overlay Styles */
-        #password-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: #262626;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .password-box {
-            background: #fff;
-            padding: 40px;
-            border-radius: 15px;
-            text-align: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        .password-box input {
-            padding: 10px;
-            margin: 10px 0;
-            width: 80%;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .password-box button {
-            background: var(--primary);
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
+/* LOCK */
+#lock{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+.lbox{background:var(--bg2);border:1px solid var(--bd);border-radius:16px;padding:44px 36px;width:340px;text-align:center}
+.lbox h2{font-size:19px;font-weight:700;margin-bottom:6px}
+.lbox p{color:var(--mu);font-size:12px;margin-bottom:24px}
+.lbox input{width:100%;padding:11px 14px;background:var(--bg3);border:1px solid var(--bd);border-radius:8px;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:16px;letter-spacing:4px;text-align:center;outline:none;transition:border-color .2s}
+.lbox input:focus{border-color:var(--or)}
+.lbox button{margin-top:12px;width:100%;background:var(--or);color:#000;border:none;border-radius:8px;padding:12px;font-weight:700;font-size:14px;cursor:pointer;font-family:'Space Grotesk',sans-serif}
+.lerr{color:var(--re);font-size:12px;margin-top:8px;min-height:16px}
 
-        /* App Styles */
-        #app-content { display: none; }
-        .container { max-width: 800px; margin: auto; }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-        .stat-card {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
-        .stat-card h3 { margin: 0; color: var(--primary); font-size: 24px; }
-        .stat-card p { margin: 5px 0 0; font-size: 12px; color: #666; text-transform: uppercase; }
-        
-        .chart-container {
-            background: var(--card-bg);
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-        }
+/* SYNC BAR */
+#sbar{position:fixed;top:0;left:0;right:0;height:34px;background:var(--bg2);border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:center;gap:8px;font-size:11px;color:var(--mu);z-index:100}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--mu);transition:background .3s}
+#sbar.ok .sdot{background:var(--gr)}
+#sbar.saving .sdot{background:var(--or);animation:blink 1s infinite}
+#sbar.err .sdot{background:var(--re)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
 
-        .task-list { list-style: none; padding: 0; }
-        .task-item {
-            background: var(--card-bg);
-            padding: 15px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            border-left: 4px solid var(--primary);
-        }
-        .task-item.completed { opacity: 0.6; }
-        .task-item.completed .text { text-decoration: line-through; }
-        .task-item input { margin-right: 15px; width: 20px; height: 20px; accent-color: var(--primary); }
-        .task-points { margin-left: auto; font-size: 12px; font-weight: bold; color: var(--primary); background: #fff3e0; padding: 3px 8px; border-radius: 10px;}
-        
-        .btn {
-            background: #262626; color: #fff; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; width: 100%; margin-top: 20px;
-        }
-    </style>
+/* APP */
+#app{display:none;padding-top:34px}
+.wrap{max-width:820px;margin:0 auto;padding:0 20px}
+
+/* HEADER */
+.hdr{padding:24px 0 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd)}
+.hdr-l h1{font-size:20px;font-weight:700;letter-spacing:-.3px}
+.hdr-l h1 span{color:var(--or)}
+.hdr-l p{color:var(--mu);font-size:12px;margin-top:3px}
+.pbadge{font-size:11px;font-weight:600;padding:4px 12px;border-radius:20px;font-family:'JetBrains Mono',monospace;background:var(--or2);color:var(--or);border:1px solid rgba(246,146,6,.25)}
+
+/* NAV TABS */
+.tabs{display:flex;gap:4px;margin:18px 0 0;border-bottom:1px solid var(--bd);padding-bottom:0}
+.tab{padding:8px 16px;font-size:13px;font-weight:500;color:var(--mu);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .2s,border-color .2s;user-select:none}
+.tab.on{color:var(--or);border-bottom-color:var(--or)}
+.tab:hover:not(.on){color:var(--tx)}
+
+/* PANELS */
+.panel{display:none;padding:20px 0}
+.panel.on{display:block}
+
+/* STATS */
+.sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.sc{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:16px;text-align:center}
+.sc .v{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;color:var(--or);line-height:1}
+.sc .l{font-size:10px;color:var(--mu);margin-top:5px;text-transform:uppercase;letter-spacing:.5px}
+
+/* PROGRESS BAR */
+.pbar-wrap{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px 18px;margin-bottom:16px}
+.pbar-meta{display:flex;justify-content:space-between;margin-bottom:8px;font-size:12px;color:var(--mu)}
+.pbar-meta strong{color:var(--tx)}
+.ptrack{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden}
+.pfill{height:100%;background:var(--or);border-radius:3px;transition:width .4s;min-width:2px}
+
+/* CHART */
+.chart-box{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:18px;margin-bottom:16px}
+.chart-box h3{font-size:11px;color:var(--mu);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
+
+/* ── DAY NAVIGATOR ── */
+.daynav{background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.daynav-btn{background:var(--bg3);border:1px solid var(--bd);border-radius:6px;color:var(--tx);padding:6px 10px;cursor:pointer;font-size:18px;font-weight:600;transition:background .2s;flex-shrink:0}
+.daynav-btn:hover{background:var(--bg4)}
+.daynav-btn:disabled{opacity:.3;cursor:not-allowed}
+.daynav-center{flex:1;text-align:center}
+.daynav-label{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--mu)}
+.daynav-cur{font-size:16px;font-weight:700;color:var(--or)}
+.day-jump{display:flex;align-items:center;gap:8px;margin-top:8px;justify-content:center}
+.day-jump input{width:72px;padding:6px 10px;background:var(--bg3);border:1px solid var(--bd);border-radius:6px;color:var(--tx);font-family:'JetBrains Mono',monospace;font-size:13px;text-align:center;outline:none}
+.day-jump input:focus{border-color:var(--or)}
+.day-jump button{background:var(--or);color:#000;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:'Space Grotesk',sans-serif}
+
+/* TASK SECTION HEADER */
+.tsec{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.tsec h2{font-size:16px;font-weight:600}
+.tsec .dchip{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--bg3);border:1px solid var(--bd);border-radius:16px;padding:3px 10px;color:var(--mu)}
+
+/* VIEWING BANNER */
+.view-banner{background:var(--bl);background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25);border-radius:8px;padding:8px 14px;margin-bottom:12px;font-size:12px;color:#93c5fd;display:flex;align-items:center;justify-content:space-between}
+.view-banner button{background:transparent;border:1px solid rgba(147,197,253,.3);border-radius:5px;color:#93c5fd;font-size:11px;padding:3px 10px;cursor:pointer}
+
+/* TASKS */
+.task{background:var(--bg2);border:1px solid var(--bd);border-radius:8px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:7px;cursor:pointer;transition:border-color .2s}
+.task:hover{border-color:var(--bd2)}
+.task.done{opacity:.5}
+.task.done .ttext{text-decoration:line-through;color:var(--mu)}
+.task.overdue{border-left:3px solid var(--re);border-radius:0 8px 8px 0}
+.task.custom-t{border-left:3px solid var(--bl);border-radius:0 8px 8px 0}
+.task.viewing{cursor:default}
+.task.viewing:hover{border-color:var(--bd)}
+.tchk{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--bd);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:background .2s,border-color .2s}
+.task.done .tchk{background:var(--or);border-color:var(--or)}
+.task.viewing .tchk{pointer-events:none;opacity:.6}
+.tchk svg{display:none}
+.task.done .tchk svg{display:block}
+.ttext{flex:1;font-size:13px;line-height:1.45}
+.ttag{font-size:10px;border-radius:4px;padding:2px 7px;flex-shrink:0}
+.ttag.overdue{color:var(--re);background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2)}
+.ttag.custom{color:#93c5fd;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.2)}
+.tpts{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--or);background:var(--or2);border-radius:4px;padding:2px 7px;flex-shrink:0}
+.del-btn{background:transparent;border:none;color:var(--re);cursor:pointer;font-size:16px;padding:2px 4px;opacity:.6;flex-shrink:0}
+.del-btn:hover{opacity:1}
+
+/* ADD CUSTOM TASK */
+.add-box{background:var(--bg2);border:1px dashed var(--bd2);border-radius:8px;padding:14px;margin-top:10px}
+.add-box h4{font-size:12px;color:var(--mu);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.add-row{display:flex;gap:8px}
+.add-row input{flex:1;padding:9px 12px;background:var(--bg3);border:1px solid var(--bd);border-radius:7px;color:var(--tx);font-family:'Space Grotesk',sans-serif;font-size:13px;outline:none}
+.add-row input:focus{border-color:var(--or)}
+.add-row button{background:var(--or);color:#000;border:none;border-radius:7px;padding:9px 14px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
+
+/* ADVANCE */
+.adv-btn{width:100%;margin-top:18px;background:var(--or);color:#000;border:none;border-radius:9px;padding:14px;font-weight:700;font-size:14px;cursor:pointer;font-family:'Space Grotesk',sans-serif;transition:opacity .2s}
+.adv-btn:hover{opacity:.85}
+.adv-btn:disabled{opacity:.35;cursor:not-allowed}
+.back{display:block;text-align:center;margin-top:16px;color:var(--mu);font-size:12px;text-decoration:none}
+.back:hover{color:var(--tx)}
+
+/* SPINNER */
+#ldg{text-align:center;padding:60px 0;color:var(--mu)}
+.spin{width:26px;height:26px;border:2.5px solid var(--bd);border-top-color:var(--or);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:580px){
+  .sgrid{grid-template-columns:repeat(2,1fr)}
+  .hdr{flex-direction:column;align-items:flex-start;gap:8px}
+  .tabs{overflow-x:auto}
+}
+</style>
 </head>
 <body>
 
-    <!-- PASSWORD GATE -->
-    <div id="password-overlay">
-        <div class="password-box">
-            <h2>Authorized Access Only</h2>
-            <input type="password" id="pass-input" placeholder="Enter Password">
-            <br>
-            <button onclick="checkPassword()">Unlock Dashboard</button>
-            <p id="error-msg" style="color: red; display: none; font-size: 12px;">Incorrect Password</p>
-        </div>
+<div id="lock">
+  <div class="lbox">
+    <div style="font-size:36px;margin-bottom:14px">🔐</div>
+    <h2>Mission 365</h2>
+    <p>Authorized access only</p>
+    <input type="password" id="pi" placeholder="••••••••" onkeydown="if(event.key==='Enter')unlock()">
+    <button onclick="unlock()">Unlock Dashboard</button>
+    <div class="lerr" id="lerr"></div>
+  </div>
+</div>
+
+<div id="sbar" class="ok">
+  <div class="sdot"></div>
+  <span id="slbl">Progress saved to cloud</span>
+</div>
+
+<div id="app">
+<div class="wrap">
+
+  <div class="hdr">
+    <div class="hdr-l">
+      <h1>Mission <span>365</span></h1>
+      <p>AI Growth Systems Engineer · ₹1Cr Journey</p>
     </div>
+    <div class="pbadge" id="pbadge">Phase 1</div>
+  </div>
 
-    <!-- MAIN APP -->
-    <div id="app-content" class="container">
-        <h1 style="text-align: center;">Mission 365 Dashboard</h1>
-        
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3 id="current-day">1</h3>
-                <p>Current Day</p>
-            </div>
-            <div class="stat-card">
-                <h3 id="today-score">0 / 100</h3>
-                <p>Today's Score</p>
-            </div>
-            <div class="stat-card">
-                <h3 id="total-score">0</h3>
-                <p>Total Accumulative Score</p>
-            </div>
+  <div class="tabs">
+    <div class="tab on" onclick="showTab('today')">Today</div>
+    <div class="tab" onclick="showTab('browse')">Browse Days</div>
+    <div class="tab" onclick="showTab('stats')">Stats & Chart</div>
+  </div>
+
+  <!-- TODAY PANEL -->
+  <div class="panel on" id="tab-today">
+    <div id="ldg"><div class="spin"></div>Loading your progress…</div>
+    <div id="mc" style="display:none">
+
+      <div class="sgrid">
+        <div class="sc"><div class="v" id="s-day">1</div><div class="l">Current Day</div></div>
+        <div class="sc"><div class="v" id="s-today">0/100</div><div class="l">Today Score</div></div>
+        <div class="sc"><div class="v" id="s-total">0</div><div class="l">Total Score</div></div>
+        <div class="sc"><div class="v" id="s-str">0🔥</div><div class="l">Streak</div></div>
+      </div>
+
+      <div class="pbar-wrap">
+        <div class="pbar-meta"><span>Year progress</span><strong id="ppct">0%</strong></div>
+        <div class="ptrack"><div class="pfill" id="pfill" style="width:0%"></div></div>
+      </div>
+
+      <div class="tsec">
+        <h2>Today's Tasks</h2>
+        <div class="dchip" id="dchip">Day 1</div>
+      </div>
+      <div id="tlist"></div>
+      <div class="add-box">
+        <h4>+ Add custom task for today</h4>
+        <div class="add-row">
+          <input type="text" id="cinput" placeholder="Describe your custom task…" onkeydown="if(event.key==='Enter')addCustom()">
+          <button onclick="addCustom()">Add</button>
         </div>
-
-        <div class="chart-container">
-            <canvas id="progressChart"></canvas>
-        </div>
-
-        <h2>Today's Mission (Day <span id="mission-day">1</span>)</h2>
-        <ul class="task-list" id="task-list">
-            <!-- Tasks load here -->
-        </ul>
-
-        <button class="btn" onclick="advanceDay()">Complete Day & Sync Data</button>
-        <br><br>
-        <a href="index.html" style="color: #666; text-decoration: none; font-size: 14px;">&larr; Back to Portfolio</a>
+      </div>
+      <button class="adv-btn" id="advbtn" onclick="advDay()">✅ Complete Day & Move to Next</button>
+      <a href="index.html" class="back">← Back to Portfolio</a>
     </div>
+  </div>
 
-    <script>
-        // --- 1. SECURITY LOGIC ---
-        const SECRET_PASS = "Jay@2026"; // Change this to your desired password
+  <!-- BROWSE PANEL -->
+  <div class="panel" id="tab-browse">
+    <div class="daynav">
+      <button class="daynav-btn" id="bn-prev" onclick="browseNav(-1)">‹</button>
+      <div class="daynav-center">
+        <div class="daynav-label">Viewing</div>
+        <div class="daynav-cur" id="bn-label">Day 1</div>
+        <div class="day-jump">
+          <input type="number" id="jmp" min="1" max="365" placeholder="Day #" onkeydown="if(event.key==='Enter')jumpTo()">
+          <button onclick="jumpTo()">Go</button>
+        </div>
+      </div>
+      <button class="daynav-btn" id="bn-next" onclick="browseNav(1)">›</button>
+    </div>
+    <div id="browse-content"></div>
+  </div>
 
-        function checkPassword() {
-            const input = document.getElementById('pass-input').value;
-            if (input === SECRET_PASS) {
-                document.getElementById('password-overlay').style.display = 'none';
-                document.getElementById('app-content').style.display = 'block';
-                initApp();
-            } else {
-                document.getElementById('error-msg').style.display = 'block';
-            }
-        }
+  <!-- STATS PANEL -->
+  <div class="panel" id="tab-stats">
+    <div class="sgrid" style="margin-top:4px">
+      <div class="sc"><div class="v" id="ss-day">1</div><div class="l">Current Day</div></div>
+      <div class="sc"><div class="v" id="ss-done">0</div><div class="l">Tasks Done</div></div>
+      <div class="sc"><div class="v" id="ss-total">0</div><div class="l">Total Score</div></div>
+      <div class="sc"><div class="v" id="ss-avg">0</div><div class="l">Avg Daily Score</div></div>
+    </div>
+    <div class="chart-box">
+      <h3>Daily Score History</h3>
+      <canvas id="chart" height="100"></canvas>
+    </div>
+    <div class="pbar-wrap">
+      <div class="pbar-meta"><span>Year progress</span><strong id="spct">0%</strong></div>
+      <div class="ptrack"><div class="pfill" id="spfill" style="width:0%"></div></div>
+    </div>
+  </div>
 
-        // --- 2. DATA STRUCTURE ---
-        // Tasks definition (Add all 365 days here)
-        const allTasks = [
-            { id: 1, day: 1, text: "Define daily goals" },
-            { id: 2, day: 1, text: "Read 10 pages" },
-            { id: 3, day: 1, text: "Code for 1 hour" }, // Day 1 = 3 tasks (33.3 pts each)
-            { id: 4, day: 2, text: "Exercise 30 mins" },
-            { id: 5, day: 2, text: "Update GitHub portfolio" }, // Day 2 = 2 tasks (50 pts each)
-            { id: 6, day: 3, text: "Review weekly progress" } // Day 3 = 1 task (100 pts each)
-        ];
+</div><!-- /wrap -->
+</div><!-- /app -->
 
-        // --- 3. STATE MANAGEMENT ---
-        let currentDay = parseInt(localStorage.getItem('taskApp_day')) || 1;
-        let completedTaskIds = JSON.parse(localStorage.getItem('taskApp_completed')) || [];
-        let dailyHistory = JSON.parse(localStorage.getItem('taskApp_history')) || {};
-        let myChart = null;
+<script>
+const SECRET="Jay@2026";
+const SK="mission365_v2";
+const MAXDAY=365;
+const MSCORE=100;
 
-        const MAX_SCORE_PER_DAY = 100;
+const allTasks=[
+    { id: 1, day: 1, text: "Write down your 1-year ₹1Cr vision clearly" },
+    { id: 2, day: 1, text: "Set up GitHub profile and pin 3 placeholder project repos" },
+    { id: 3, day: 1, text: "Install Python, Node.js, and VS Code with AI extensions" },
+    { id: 4, day: 2, text: "Read LangChain docs intro + run Hello World" },
+    { id: 5, day: 2, text: "Create LinkedIn headline: 'AI Automation Engineer | Building AI Systems'" },
+    { id: 6, day: 2, text: "Write your first FastAPI 'Hello World' endpoint" },
+    { id: 7, day: 3, text: "Study LangGraph basics – nodes, edges, state" },
+    { id: 8, day: 3, text: "Build a simple LangGraph chain that summarizes text" },
+    { id: 9, day: 3, text: "Post on LinkedIn: 'Day 1 of building AI systems publicly'" },
+    { id: 10, day: 4, text: "Build a basic OpenAI chatbot with memory using LangGraph" },
+    { id: 11, day: 4, text: "Push chatbot to GitHub with README" },
+    { id: 12, day: 4, text: "Research 5 AI freelance niches on Upwork" },
+    { id: 13, day: 5, text: "Create Upwork profile – focus on AI automation" },
+    { id: 14, day: 5, text: "Add chatbot project to portfolio with screenshots" },
+    { id: 15, day: 5, text: "Write a 200-word case study for the chatbot project" },
+    { id: 16, day: 6, text: "Deep work: Build a PDF Q&A RAG app with LangChain + Supabase" },
+    { id: 17, day: 6, text: "Deploy RAG app locally and test with 3 sample PDFs" },
+    { id: 18, day: 7, text: "Write LinkedIn post: 'I built a RAG chatbot – here's how'" },
+    { id: 19, day: 7, text: "Research n8n – watch intro tutorial" },
+    { id: 20, day: 7, text: "Plan next week's 3 build targets" },
+    { id: 21, day: 8, text: "Install n8n locally and explore the UI" },
+    { id: 22, day: 8, text: "Build first n8n workflow: Gmail trigger → GPT summarize → Slack notify" },
+    { id: 23, day: 8, text: "Export and document the workflow" },
+    { id: 24, day: 9, text: "Build n8n workflow: RSS feed → GPT rewrite → save to Notion" },
+    { id: 25, day: 9, text: "Screenshot workflow and add to portfolio" },
+    { id: 26, day: 9, text: "Send first Upwork proposal for AI chatbot project" },
+    { id: 27, day: 10, text: "Study Supabase: tables, auth, vector search basics" },
+    { id: 28, day: 10, text: "Set up Supabase project with pgvector enabled" },
+    { id: 29, day: 10, text: "Connect your RAG app to Supabase vector store" },
+    { id: 30, day: 11, text: "Build mini SaaS skeleton: FastAPI backend + Supabase DB" },
+    { id: 31, day: 11, text: "Add user auth to FastAPI using JWT" },
+    { id: 32, day: 11, text: "Test API endpoints with Postman" },
+    { id: 33, day: 12, text: "Study YouTube Data API v3 docs" },
+    { id: 34, day: 12, text: "Build script: search trending videos by keyword using YouTube API" },
+    { id: 35, day: 12, text: "Log top 10 results to console with title + views" },
+    { id: 36, day: 13, text: "Deep work: Build 'Trend Finder Agent' – input niche → output 10 trending topics" },
+    { id: 37, day: 13, text: "Save results to Supabase table" },
+    { id: 38, day: 13, text: "Push to GitHub: trend-finder-agent" },
+    { id: 39, day: 14, text: "Write LinkedIn post: 'How I built a Trend Finder AI Agent'" },
+    { id: 40, day: 14, text: "Engage with 10 AI builders on LinkedIn" },
+    { id: 41, day: 14, text: "Plan Week 3 builds" },
+    { id: 42, day: 15, text: "Learn ElevenLabs API – generate your first AI voiceover" },
+    { id: 43, day: 15, text: "Build script: text input → ElevenLabs voice → save MP3" },
+    { id: 44, day: 15, text: "Test with 3 different voices" },
+    { id: 45, day: 16, text: "Study Remotion basics – React-based video generation" },
+    { id: 46, day: 16, text: "Build Remotion template: title card + subtitles + outro" },
+    { id: 47, day: 16, text: "Render a 30-second test video" },
+    { id: 48, day: 17, text: "Connect ElevenLabs + Remotion: script → voice → video" },
+    { id: 49, day: 17, text: "Test full pipeline end-to-end" },
+    { id: 50, day: 17, text: "Fix bugs and document steps" },
+    { id: 51, day: 18, text: "Build n8n workflow: topic → GPT script → ElevenLabs voice" },
+    { id: 52, day: 18, text: "Add Remotion video render trigger at end" },
+    { id: 53, day: 18, text: "This is your MVP v0.1 pipeline" },
+    { id: 54, day: 19, text: "Deploy FastAPI backend to Railway or Render (free tier)" },
+    { id: 55, day: 19, text: "Test deployed API endpoints" },
+    { id: 56, day: 19, text: "Update GitHub README with live demo link" },
+    { id: 57, day: 20, text: "Deep work: Build approval dashboard UI with Next.js" },
+    { id: 58, day: 20, text: "Features: show generated script, play audio, approve/reject buttons" },
+    { id: 59, day: 21, text: "Write LinkedIn: 'Building an autonomous video pipeline – progress update'" },
+    { id: 60, day: 21, text: "Send 5 Upwork proposals for automation projects" },
+    { id: 61, day: 21, text: "Review and improve Week 3 work" },
+    { id: 62, day: 22, text: "Study Docker basics – build and run a container" },
+    { id: 63, day: 22, text: "Dockerize your FastAPI app" },
+    { id: 64, day: 22, text: "Push Docker image to Docker Hub" },
+    { id: 65, day: 23, text: "Learn Vercel deployment – deploy Next.js dashboard" },
+    { id: 66, day: 23, text: "Connect dashboard to FastAPI backend" },
+    { id: 67, day: 23, text: "Test approval flow end-to-end" },
+    { id: 68, day: 24, text: "Add YouTube Data API upload endpoint to FastAPI" },
+    { id: 69, day: 24, text: "Test uploading a video to YouTube (unlisted)" },
+    { id: 70, day: 24, text: "Document OAuth setup steps" },
+    { id: 71, day: 25, text: "Build n8n workflow: approval → auto-upload to YouTube" },
+    { id: 72, day: 25, text: "Test full pipeline: topic → video → approve → upload" },
+    { id: 73, day: 25, text: "This is MVP v1 complete" },
+    { id: 74, day: 26, text: "Record a Loom demo of MVP v1 pipeline" },
+    { id: 75, day: 26, text: "Write case study: 'How I automated video creation end-to-end'" },
+    { id: 76, day: 26, text: "Add Loom + case study to portfolio" },
+    { id: 77, day: 27, text: "Deep work: Refactor code – modularize agents into separate files" },
+    { id: 78, day: 27, text: "Add error handling and logging throughout pipeline" },
+    { id: 79, day: 28, text: "Write LinkedIn: 'I built an AI that creates and uploads videos automatically'" },
+    { id: 80, day: 28, text: "Engage heavily in comments of AI creators" },
+    { id: 81, day: 28, text: "Plan Month 2 goals" },
+    { id: 82, day: 29, text: "Research pricing: what do AI automation freelancers charge?" },
+    { id: 83, day: 29, text: "Draft your freelance service offer: AI Content Pipeline Setup" },
+    { id: 84, day: 29, text: "Set price: ₹25,000–₹75,000 per project" },
+    { id: 85, day: 30, text: "Create Fiverr profile focused on AI automation gigs" },
+    { id: 86, day: 30, text: "Post first gig: 'I will build you an AI content automation pipeline'" },
+    { id: 87, day: 30, text: "Add portfolio screenshots and Loom demo" },
+    { id: 88, day: 31, text: "Study Meta Graph API for Instagram and Facebook posting" },
+    { id: 89, day: 31, text: "Build script: post image + caption to Instagram via API" },
+    { id: 90, day: 31, text: "Test with a sample post" },
+    { id: 91, day: 32, text: "Add Instagram auto-posting to your pipeline" },
+    { id: 92, day: 32, text: "Test full flow: topic → video → approve → post to YouTube + Instagram" },
+    { id: 93, day: 33, text: "Build 'AI Newsletter Agent': trending topics → GPT summary → email via Mailchimp API" },
+    { id: 94, day: 33, text: "Test sending to yourself" },
+    { id: 95, day: 33, text: "Document as a freelance service offering" },
+    { id: 96, day: 34, text: "Deep work: Build a client-facing demo at a unique URL" },
+    { id: 97, day: 34, text: "Password protect with simple auth" },
+    { id: 98, day: 34, text: "Send demo link to 3 potential clients" },
+    { id: 99, day: 35, text: "Write LinkedIn: 'The AI systems I would sell to businesses today'" },
+    { id: 100, day: 35, text: "Engage with coaches, agency owners, ecommerce brands in comments" },
+    { id: 101, day: 35, text: "Plan Week 5 builds" },
+    { id: 102, day: 36, text: "Cold outreach: find 10 coaches or agencies on LinkedIn" },
+    { id: 103, day: 36, text: "Send 5 personalized DMs offering a free demo" },
+    { id: 104, day: 36, text: "Track responses in a Notion CRM" },
+    { id: 105, day: 37, text: "Build 'AI Lead Magnet': free tool that generates 5 content ideas from a URL" },
+    { id: 106, day: 37, text: "Deploy it publicly" },
+    { id: 107, day: 37, text: "This is your lead generation tool" },
+    { id: 108, day: 38, text: "Study LangGraph multi-agent patterns" },
+    { id: 109, day: 38, text: "Build a 2-agent system: Research Agent + Script Agent" },
+    { id: 110, day: 38, text: "Test collaboration between agents" },
+    { id: 111, day: 39, text: "Add a vector DB knowledge base to your pipeline (RAG)" },
+    { id: 112, day: 39, text: "Agents now reference past content before writing new scripts" },
+    { id: 113, day: 39, text: "Test for quality improvement" },
+    { id: 114, day: 40, text: "Refine approval dashboard: add edit-before-approve functionality" },
+    { id: 115, day: 40, text: "Add video preview in dashboard before approving" },
+    { id: 116, day: 40, text: "Test UX with a friend" },
+    { id: 117, day: 41, text: "Deep work: Build 'AI SEO Blog Agent' – keyword → researched blog post → WordPress publish" },
+    { id: 118, day: 41, text: "Test publishing to a WordPress test site" },
+    { id: 119, day: 42, text: "Write LinkedIn post featuring the Blog Agent" },
+    { id: 120, day: 42, text: "Post a before/after example of AI vs manual content creation" },
+    { id: 121, day: 42, text: "Plan Week 6" },
+    { id: 122, day: 43, text: "Study Stripe payment API basics" },
+    { id: 123, day: 43, text: "Add a payment link to your freelance portfolio page" },
+    { id: 124, day: 43, text: "Test checkout flow with Stripe test mode" },
+    { id: 125, day: 44, text: "Build a simple landing page for your service: 'AI Content Machine for Businesses'" },
+    { id: 126, day: 44, text: "Deploy to Vercel with a custom domain or subdomain" },
+    { id: 127, day: 44, text: "Add testimonial placeholder and pricing" },
+    { id: 128, day: 45, text: "Cold email 20 small businesses offering AI automation demo" },
+    { id: 129, day: 45, text: "Track opens with a free tool like Mailtrack" },
+    { id: 130, day: 45, text: "Follow up on LinkedIn connections" },
+    { id: 131, day: 46, text: "Study Pika Labs or Runway API for AI video generation" },
+    { id: 132, day: 46, text: "Generate 3 sample AI videos from text prompts" },
+    { id: 133, day: 46, text: "Compare quality and cost" },
+    { id: 134, day: 47, text: "Integrate Runway/Pika into pipeline: script → AI-generated visuals" },
+    { id: 135, day: 47, text: "Replace static Remotion slides with AI video scenes" },
+    { id: 136, day: 47, text: "Test render time and cost" },
+    { id: 137, day: 48, text: "Deep work: Rebuild pipeline v2 with AI visuals integrated" },
+    { id: 138, day: 48, text: "Test full flow with a finance niche topic" },
+    { id: 139, day: 49, text: "Write LinkedIn: 'Month 1 complete – here's what I built'" },
+    { id: 140, day: 49, text: "Share pipeline demo video on LinkedIn" },
+    { id: 141, day: 49, text: "Review income vs target" },
+    { id: 142, day: 50, text: "Set Month 2 targets: land 1 paying client" },
+    { id: 143, day: 50, text: "Improve portfolio with 3 new project case studies" },
+    { id: 144, day: 50, text: "Apply to 10 more Upwork jobs" },
+    { id: 145, day: 51, text: "Build 'AI Twitter/X Thread Agent': topic → viral thread → auto-post" },
+    { id: 146, day: 51, text: "Test with a productivity niche topic" },
+    { id: 147, day: 51, text: "Add to service menu" },
+    { id: 148, day: 52, text: "Study webhook basics – build n8n webhook trigger" },
+    { id: 149, day: 52, text: "Build: Typeform submission → n8n → GPT → email response automation" },
+    { id: 150, day: 52, text: "Test with a mock form" },
+    { id: 151, day: 53, text: "Create a Notion dashboard to track: daily tasks, revenue, client pipeline" },
+    { id: 152, day: 53, text: "Update daily for accountability" },
+    { id: 153, day: 53, text: "Review week gaps" },
+    { id: 154, day: 54, text: "Deep work: Build 'AI LinkedIn Post Generator' service" },
+    { id: 155, day: 54, text: "Input: company blog URL → Output: 5 LinkedIn post drafts" },
+    { id: 156, day: 54, text: "Package as a freelance service" },
+    { id: 157, day: 55, text: "Warm outreach: message 10 past contacts about AI services" },
+    { id: 158, day: 55, text: "Offer a free 30-min audit call" },
+    { id: 159, day: 55, text: "Book at least 1 discovery call" },
+    { id: 160, day: 56, text: "Write LinkedIn: 'Here are 5 AI automations every business should have'" },
+    { id: 161, day: 56, text: "This is your top-of-funnel content" },
+    { id: 162, day: 56, text: "Engage with all comments" },
+    { id: 163, day: 57, text: "Do a discovery call with at least 1 prospect" },
+    { id: 164, day: 57, text: "Understand their content workflow and pain points" },
+    { id: 165, day: 57, text: "Send a follow-up proposal within 24 hours" },
+    { id: 166, day: 58, text: "Build a proposal template in Notion" },
+    { id: 167, day: 58, text: "Customize for the prospect's niche" },
+    { id: 168, day: 58, text: "Price at ₹30,000 for MVP pipeline setup" },
+    { id: 169, day: 59, text: "Study n8n advanced: sub-workflows, error handling, custom nodes" },
+    { id: 170, day: 59, text: "Refactor all workflows to be modular" },
+    { id: 171, day: 59, text: "Document each workflow clearly" },
+    { id: 172, day: 60, text: "Deep work: Build a full demo for a finance niche client" },
+    { id: 173, day: 60, text: "Topic: 'Top 5 mutual funds this month' → fully automated video" },
+    { id: 174, day: 61, text: "Record full demo of finance niche pipeline" },
+    { id: 175, day: 61, text: "Create a 3-minute Loom walkthrough" },
+    { id: 176, day: 61, text: "Share in LinkedIn DMs with prospects" },
+    { id: 177, day: 62, text: "Close or follow up on any open proposals" },
+    { id: 178, day: 62, text: "Start delivery if a client signed" },
+    { id: 179, day: 62, text: "Build a project tracker in Notion" },
+    { id: 180, day: 63, text: "Write LinkedIn: 'Why businesses need AI content systems, not just tools'" },
+    { id: 181, day: 63, text: "Post the finance niche demo video" },
+    { id: 182, day: 63, text: "Plan Week 9" },
+    { id: 183, day: 64, text: "Deliver first client project or continue building" },
+    { id: 184, day: 64, text: "Daily standup note: what did I build today?" },
+    { id: 185, day: 64, text: "Push all code to GitHub" },
+    { id: 186, day: 65, text: "Add analytics to the pipeline: track video views per platform" },
+    { id: 187, day: 65, text: "Store in Supabase, display in dashboard" },
+    { id: 188, day: 66, text: "Study LangSmith or LangFuse for agent observability" },
+    { id: 189, day: 66, text: "Add tracing to your LangGraph agents" },
+    { id: 190, day: 66, text: "This improves debugging + client trust" },
+    { id: 191, day: 67, text: "Build 'AI Competitor Analysis Agent': input brand → output competitor content gaps" },
+    { id: 192, day: 67, text: "Package as a premium add-on service" },
+    { id: 193, day: 68, text: "Deep work: Build a scheduling feature in the approval dashboard" },
+    { id: 194, day: 68, text: "Users can set: post on Monday 9AM, Wednesday 6PM, Friday 12PM" },
+    { id: 195, day: 69, text: "Test scheduling with YouTube and Instagram APIs" },
+    { id: 196, day: 69, text: "Fix timezone handling issues" },
+    { id: 197, day: 70, text: "Write LinkedIn: 'I added AI competitor research to my content pipeline'" },
+    { id: 198, day: 70, text: "Engage with agency owners in comments" },
+    { id: 199, day: 70, text: "Review Week 9 progress" },
+    { id: 200, day: 71, text: "Study Python asyncio – make your pipeline non-blocking" },
+    { id: 201, day: 71, text: "Refactor FastAPI endpoints to be async" },
+    { id: 202, day: 71, text: "Load test with 3 concurrent requests" },
+    { id: 203, day: 72, text: "Build a simple admin panel: view all running pipelines and their status" },
+    { id: 204, day: 72, text: "Show: pending approval, scheduled, published, failed" },
+    { id: 205, day: 73, text: "Add retry logic to all external API calls (OpenAI, ElevenLabs, YouTube)" },
+    { id: 206, day: 73, text: "Test failure scenarios manually" },
+    { id: 207, day: 74, text: "Deep work: Build 'AI Podcast Repurposer' – upload MP3 → transcript → blog + shorts + tweets" },
+    { id: 208, day: 74, text: "Test with a 10-minute audio file" },
+    { id: 209, day: 75, text: "Package Podcast Repurposer as a service offering" },
+    { id: 210, day: 75, text: "Add to portfolio and landing page" },
+    { id: 211, day: 75, text: "Price: ₹15,000 one-time or ₹8,000/month" },
+    { id: 212, day: 76, text: "Reach out to 5 podcast creators on LinkedIn or Twitter" },
+    { id: 213, day: 76, text: "Offer a free trial of Podcast Repurposer" },
+    { id: 214, day: 76, text: "Track responses" },
+    { id: 215, day: 77, text: "Write LinkedIn: 'I built an AI that turns podcast episodes into 10 pieces of content'" },
+    { id: 216, day: 77, text: "Post with a demo GIF or video" },
+    { id: 217, day: 77, text: "Plan Month 3" },
+    { id: 218, day: 78, text: "Set Month 3 goals: ₹1L revenue, 2 clients, launch waitlist" },
+    { id: 219, day: 78, text: "Review all systems built so far" },
+    { id: 220, day: 78, text: "Identify the weakest links in your pipeline" },
+    { id: 221, day: 79, text: "Build 'AI Hooks Generator': niche + topic → 20 viral hook variations" },
+    { id: 222, day: 79, text: "Test with 5 different niches" },
+    { id: 223, day: 79, text: "Add to dashboard as a tool" },
+    { id: 224, day: 80, text: "Study TikTok API for auto-posting (or use a third-party tool)" },
+    { id: 225, day: 80, text: "Integrate TikTok posting into pipeline" },
+    { id: 226, day: 81, text: "Deep work: Build a multi-platform publisher" },
+    { id: 227, day: 81, text: "One approval → post to YouTube + Instagram + TikTok + LinkedIn + X" },
+    { id: 228, day: 82, text: "Test multi-platform publish with a sample video" },
+    { id: 229, day: 82, text: "Fix format issues (vertical vs horizontal, caption limits)" },
+    { id: 230, day: 83, text: "Build a content calendar view in the dashboard" },
+    { id: 231, day: 83, text: "Show: scheduled posts per platform per week" },
+    { id: 232, day: 84, text: "Write LinkedIn: 'One approval → 5 platforms posted automatically. Here's how.'" },
+    { id: 233, day: 84, text: "This post should go viral in AI niche" },
+    { id: 234, day: 84, text: "Engage all day" },
+    { id: 235, day: 85, text: "Prepare freelance portfolio v2: 5 case studies, demo videos, pricing" },
+    { id: 236, day: 85, text: "Deploy updated landing page to Vercel" },
+    { id: 237, day: 86, text: "Apply to 20 Upwork jobs with a custom proposal for each" },
+    { id: 238, day: 86, text: "Focus on: content agencies, coaches, SaaS companies" },
+    { id: 239, day: 87, text: "Deep work: Build a client onboarding flow" },
+    { id: 240, day: 87, text: "Client fills Typeform → pipeline auto-configures for their niche" },
+    { id: 241, day: 88, text: "Study Stripe subscriptions – monthly recurring billing" },
+    { id: 242, day: 88, text: "Add a subscription plan to your landing page: ₹1L/month" },
+    { id: 243, day: 89, text: "Reach out to 3 digital marketing agencies offering white-label AI pipeline service" },
+    { id: 244, day: 89, text: "Pitch: they resell your system to their clients" },
+    { id: 245, day: 90, text: "Write LinkedIn: 'Phase 1 complete – 90 days of building AI systems'" },
+    { id: 246, day: 90, text: "Share metrics: code pushed, clients contacted, revenue earned" },
+    { id: 247, day: 90, text: "Plan Phase 2 in detail" },
+    { id: 248, day: 91, text: "Define your productized offer: '60 AI Videos/Month – Done For You'" },
+    { id: 249, day: 91, text: "Write a clear one-pager for the service" },
+    { id: 250, day: 91, text: "Set pricing: ₹1L/month starter plan" },
+    { id: 251, day: 92, text: "Build a sales deck (5 slides) for your productized service" },
+    { id: 252, day: 92, text: "Slide topics: problem, solution, demo, results, pricing" },
+    { id: 253, day: 93, text: "Record a 5-minute sales video for the service" },
+    { id: 254, day: 93, text: "Host on Loom and embed in landing page" },
+    { id: 255, day: 94, text: "Deep work: Improve pipeline stability for client delivery" },
+    { id: 256, day: 94, text: "Add queue system: Bull/BullMQ in Node.js or Celery in Python" },
+    { id: 257, day: 95, text: "Set up Redis locally and connect to queue system" },
+    { id: 258, day: 95, text: "Test: 3 videos queued and processed in order" },
+    { id: 259, day: 96, text: "Build client-specific config: each client has a niche, tone, posting schedule" },
+    { id: 260, day: 96, text: "Store in Supabase, load at pipeline start" },
+    { id: 261, day: 97, text: "Write LinkedIn: 'Why I moved from freelancing to productized services'" },
+    { id: 262, day: 97, text: "Explain the leverage difference clearly" },
+    { id: 263, day: 98, text: "Do discovery calls with 3 new prospects" },
+    { id: 264, day: 98, text: "Focus on ecommerce brands, coaches, agencies" },
+    { id: 265, day: 99, text: "Send 3 custom proposals for ₹1L/month service" },
+    { id: 266, day: 99, text: "Include ROI calculation: 60 videos vs hiring a team" },
+    { id: 267, day: 100, text: "Deep work: Build a client reporting dashboard" },
+    { id: 268, day: 100, text: "Weekly email report: videos published, views, engagement per platform" },
+    { id: 269, day: 101, text: "Integrate Google Analytics or platform APIs for view tracking" },
+    { id: 270, day: 101, text: "Store metrics in Supabase, visualize in dashboard" },
+    { id: 271, day: 102, text: "Build an automated weekly report email using n8n" },
+    { id: 272, day: 102, text: "Trigger: every Sunday 8PM → fetch metrics → GPT write report → email client" },
+    { id: 273, day: 103, text: "Test full client lifecycle: onboard → configure → generate → approve → post → report" },
+    { id: 274, day: 104, text: "Write LinkedIn: 'Here's the exact workflow I use to deliver AI content for clients'" },
+    { id: 275, day: 105, text: "Study OpenAI function calling / tool use in depth" },
+    { id: 276, day: 105, text: "Refactor agents to use structured tool calls" },
+    { id: 277, day: 105, text: "Improves reliability of agent outputs" },
+    { id: 278, day: 106, text: "Build 'Quality Gate Agent': checks each video before approval request" },
+    { id: 279, day: 106, text: "Rejects if: script too short, voice unclear, video too dark" },
+    { id: 280, day: 107, text: "Add A/B hook testing: generate 3 hook variations per video, track which performs best" },
+    { id: 281, day: 107, text: "Store results in Supabase" },
+    { id: 282, day: 108, text: "Deep work: Build niche-specific prompt templates" },
+    { id: 283, day: 108, text: "Templates for: finance, coaching, ecommerce, SaaS, motivation" },
+    { id: 284, day: 109, text: "Test each template with 3 sample topics" },
+    { id: 285, day: 109, text: "Rate output quality 1–10" },
+    { id: 286, day: 109, text: "Improve underperforming templates" },
+    { id: 287, day: 110, text: "Build a prompt library manager in the dashboard" },
+    { id: 288, day: 110, text: "Users can create, edit, and save custom prompt templates" },
+    { id: 289, day: 111, text: "Write LinkedIn: '10 AI prompt templates for automated video scripts (free)'" },
+    { id: 290, day: 111, text: "Share the templates as a lead magnet PDF" },
+    { id: 291, day: 112, text: "Study vector embeddings deeply: cosine similarity, clustering" },
+    { id: 292, day: 112, text: "Build 'Content Uniqueness Checker': rejects scripts too similar to past content" },
+    { id: 293, day: 113, text: "Integrate uniqueness checker into pipeline" },
+    { id: 294, day: 113, text: "Test with 20 scripts from the same niche" },
+    { id: 295, day: 114, text: "Build 'Trend Spike Detector': alerts when a topic is trending fast" },
+    { id: 296, day: 114, text: "Use Google Trends API + YouTube trending endpoint" },
+    { id: 297, day: 115, text: "Deep work: Build notification system" },
+    { id: 298, day: 115, text: "Pipeline alerts via email or Slack when: video ready, post published, error occurred" },
+    { id: 299, day: 116, text: "Set up a business email (Google Workspace) for client communication" },
+    { id: 300, day: 116, text: "Create: hello@youraicompany.com, reports@youraicompany.com" },
+    { id: 301, day: 117, text: "Formalize client contract template in Notion" },
+    { id: 302, day: 117, text: "Include: scope, deliverables, payment terms, IP ownership" },
+    { id: 303, day: 118, text: "Write LinkedIn: 'The AI tech stack I use to run an autonomous content agency'" },
+    { id: 304, day: 119, text: "Close your first ₹1L/month client or follow up on all pending proposals" },
+    { id: 305, day: 119, text: "This is the primary Week 17 goal" },
+    { id: 306, day: 120, text: "Onboard client: configure niche, brand voice, posting schedule" },
+    { id: 307, day: 120, text: "Test pipeline with client's topic" },
+    { id: 308, day: 121, text: "Deep work: Build a white-label version of your dashboard" },
+    { id: 309, day: 121, text: "Remove your branding – agencies can resell it" },
+    { id: 310, day: 122, text: "Pitch white-label service to 3 digital marketing agencies" },
+    { id: 311, day: 122, text: "Offer: ₹50,000/month for unlimited client seats" },
+    { id: 312, day: 123, text: "Build 'AI Brand Voice Trainer': upload past content → extract tone → apply to all future scripts" },
+    { id: 313, day: 124, text: "Test brand voice trainer with 5 sample brands" },
+    { id: 314, day: 124, text: "Measure consistency score" },
+    { id: 315, day: 125, text: "Write LinkedIn: 'How to teach an AI your brand voice (step by step)'" },
+    { id: 316, day: 126, text: "Study LinkedIn API for auto-posting" },
+    { id: 317, day: 126, text: "Build script: post article or video to LinkedIn company page" },
+    { id: 318, day: 127, text: "Add LinkedIn to multi-platform publisher" },
+    { id: 319, day: 127, text: "Test with a sample post" },
+    { id: 320, day: 128, text: "Build 'Content Repurposing Agent': long video → 5 shorts + 1 blog + 3 tweets + 2 LinkedIn posts" },
+    { id: 321, day: 129, text: "Deep work: Test repurposing agent with 3 different long-form topics" },
+    { id: 322, day: 130, text: "Package repurposing agent as an add-on: ₹30,000/month extra" },
+    { id: 323, day: 131, text: "Pitch repurposing add-on to existing clients and prospects" },
+    { id: 324, day: 132, text: "Write LinkedIn: 'Turn 1 video into 10 pieces of content with AI – here's the system'" },
+    { id: 325, day: 133, text: "Study MCP (Model Context Protocol) basics" },
+    { id: 326, day: 133, text: "Build your first MCP tool that agents can call" },
+    { id: 327, day: 134, text: "Integrate MCP tool into LangGraph pipeline" },
+    { id: 328, day: 134, text: "Agents can now call external tools via MCP" },
+    { id: 329, day: 135, text: "Build 'AI Thumbnail Generator': script summary → DALL-E thumbnail → A/B test with YouTube API" },
+    { id: 330, day: 136, text: "Deep work: Integrate thumbnail generator into pipeline" },
+    { id: 331, day: 136, text: "Test with 5 videos" },
+    { id: 332, day: 137, text: "Study SEO basics: keyword research, title optimization, description writing" },
+    { id: 333, day: 137, text: "Build 'SEO Optimizer Agent': video title + description + tags auto-generated" },
+    { id: 334, day: 138, text: "Add SEO agent output to YouTube upload step" },
+    { id: 335, day: 138, text: "Test ranking improvement on test channel" },
+    { id: 336, day: 139, text: "Write LinkedIn: 'How AI can optimize your YouTube SEO automatically'" },
+    { id: 337, day: 140, text: "Review all client deliverables and quality" },
+    { id: 338, day: 140, text: "Get feedback from clients proactively" },
+    { id: 339, day: 140, text: "Improve based on feedback" },
+    { id: 340, day: 141, text: "Build 'AI Comments Responder': reads YouTube/Instagram comments → drafts replies → awaits approval" },
+    { id: 341, day: 142, text: "Test comments responder with 20 real comments" },
+    { id: 342, day: 142, text: "Edit and approve responses" },
+    { id: 343, day: 143, text: "Deep work: Improve dashboard UX – add onboarding flow for new clients" },
+    { id: 344, day: 143, text: "Guided setup: niche → voice → schedule → done" },
+    { id: 345, day: 144, text: "User test dashboard with 2 non-technical people" },
+    { id: 346, day: 144, text: "Note every point of confusion" },
+    { id: 347, day: 144, text: "Fix top 3 issues" },
+    { id: 348, day: 145, text: "Build a help documentation site with Mintlify or Notion" },
+    { id: 349, day: 145, text: "Docs: getting started, features, FAQ" },
+    { id: 350, day: 146, text: "Set up a support email and basic ticket system (Notion or Freshdesk free tier)" },
+    { id: 351, day: 147, text: "Write LinkedIn: 'Month 5 update – clients, revenue, and lessons learned'" },
+    { id: 352, day: 148, text: "Study churn prevention: why SaaS clients leave" },
+    { id: 353, day: 148, text: "Build proactive check-in system: weekly Loom update to clients" },
+    { id: 354, day: 149, text: "Create upsell path: starter client → premium client → enterprise" },
+    { id: 355, day: 149, text: "Define what each tier includes" },
+    { id: 356, day: 150, text: "Deep work: Build 'AI Webinar Clipper': webinar recording → top 10 clips → auto-posted as shorts" },
+    { id: 357, day: 151, text: "Test webinar clipper with a 60-minute sample webinar" },
+    { id: 358, day: 152, text: "Pitch webinar clipper to online course creators and coaches" },
+    { id: 359, day: 153, text: "Study pricing psychology: anchoring, value stacking, decoy pricing" },
+    { id: 360, day: 153, text: "Revise your pricing page" },
+    { id: 361, day: 154, text: "Write LinkedIn: 'The AI tools I use to save 40+ hours per week for my clients'" },
+    { id: 362, day: 155, text: "Build 'AI Email Newsletter Agent': trending topics → personalized newsletter → send via Mailchimp/Brevo" },
+    { id: 363, day: 156, text: "Test newsletter agent: choose 3 niches, generate sample newsletters" },
+    { id: 364, day: 156, text: "Compare quality" },
+    { id: 365, day: 157, text: "Deep work: Build subscriber segmentation: different newsletter tracks by interest" },
+    { id: 366, day: 158, text: "Package newsletter agent as a service: ₹25,000/month" },
+    { id: 367, day: 158, text: "Add to service menu" },
+    { id: 368, day: 159, text: "Pitch newsletter service to 5 SaaS companies and coaches" },
+    { id: 369, day: 160, text: "Study prompt caching and cost optimization for OpenAI API" },
+    { id: 370, day: 160, text: "Reduce your API costs by 30%" },
+    { id: 371, day: 161, text: "Write LinkedIn: 'I reduced my AI API costs by 40% with one technique'" },
+    { id: 372, day: 162, text: "Review Phase 2 progress: revenue, clients, systems built" },
+    { id: 373, day: 162, text: "Identify top 3 bottlenecks" },
+    { id: 374, day: 163, text: "Deep work: Fix the biggest bottleneck in your pipeline" },
+    { id: 375, day: 163, text: "Focus on the one thing causing most client issues" },
+    { id: 376, day: 164, text: "Build 'AI Repurpose Scheduler': one long-form piece → 30-day content calendar + auto-schedule" },
+    { id: 377, day: 165, text: "Test repurpose scheduler with a coaching client topic" },
+    { id: 378, day: 166, text: "Hire a part-time VA (virtual assistant) to handle client communication and approvals" },
+    { id: 379, day: 166, text: "Free up 2 hours/day for building" },
+    { id: 380, day: 167, text: "Create VA onboarding doc: what to approve, when to escalate, how to respond" },
+    { id: 381, day: 168, text: "Write LinkedIn: 'How I'm scaling my AI agency without burning out'" },
+    { id: 382, day: 169, text: "Study Supabase Edge Functions for serverless API endpoints" },
+    { id: 383, day: 169, text: "Migrate 2 lightweight FastAPI endpoints to Supabase Edge Functions" },
+    { id: 384, day: 170, text: "Build 'AI A/B Test Manager': test 2 versions of a video title/thumbnail, track winner" },
+    { id: 385, day: 171, text: "Integrate A/B test manager with YouTube Analytics API" },
+    { id: 386, day: 172, text: "Deep work: Build analytics dashboard v2" },
+    { id: 387, day: 172, text: "Charts: views/day, engagement rate, best-performing niches, top videos" },
+    { id: 388, day: 173, text: "Test dashboard with real client data" },
+    { id: 389, day: 173, text: "Fix data accuracy issues" },
+    { id: 390, day: 174, text: "Add competitor benchmarking to dashboard: 'Your channel vs top 3 competitors'" },
+    { id: 391, day: 175, text: "Write LinkedIn: 'The AI analytics system I built to 10x content performance'" },
+    { id: 392, day: 176, text: "Study LangGraph advanced: conditional edges, human-in-the-loop, parallel agents" },
+    { id: 393, day: 176, text: "Refactor pipeline to use parallel agents where possible" },
+    { id: 394, day: 177, text: "Build 'Parallel Research + Script Agent': both run simultaneously, merge results" },
+    { id: 395, day: 178, text: "Benchmark: parallel vs sequential pipeline speed" },
+    { id: 396, day: 178, text: "Target: 50% faster" },
+    { id: 397, day: 179, text: "Deep work: Build multi-language support" },
+    { id: 398, day: 179, text: "Generate scripts in Hindi, English, regional languages based on target audience" },
+    { id: 399, day: 180, text: "Test Hindi content pipeline with a finance topic" },
+    { id: 400, day: 180, text: "Validate voice quality in Hindi with ElevenLabs" },
+    { id: 401, day: 181, text: "Add language selector to client dashboard" },
+    { id: 402, day: 181, text: "Clients choose: English / Hindi / Hinglish" },
+    { id: 403, day: 182, text: "Write LinkedIn: 'I built a multilingual AI content system for Indian creators'" },
+    { id: 404, day: 183, text: "Study Stripe billing portal – let clients manage their own subscription" },
+    { id: 405, day: 183, text: "Integrate into client dashboard" },
+    { id: 406, day: 184, text: "Build automated invoice generation with Stripe + PDF" },
+    { id: 407, day: 184, text: "Auto-send monthly invoice on billing date" },
+    { id: 408, day: 185, text: "Deep work: Build 'AI Content Strategy Agent': analyze channel → recommend content pillars + posting frequency" },
+    { id: 409, day: 186, text: "Test content strategy agent with 3 different channel types" },
+    { id: 410, day: 187, text: "Package content strategy as a one-time audit service: ₹15,000" },
+    { id: 411, day: 187, text: "Add to service menu" },
+    { id: 412, day: 188, text: "Pitch strategy audit to 5 new prospects as a low-ticket entry offer" },
+    { id: 413, day: 189, text: "Write LinkedIn: 'How AI can build your 90-day content strategy in minutes'" },
+    { id: 414, day: 190, text: "Review client retention and satisfaction" },
+    { id: 415, day: 190, text: "Send NPS survey to all clients" },
+    { id: 416, day: 190, text: "Act on feedback this week" },
+    { id: 417, day: 191, text: "Build referral program: client refers a business → gets 1 month free" },
+    { id: 418, day: 191, text: "Set up tracking in Notion" },
+    { id: 419, day: 192, text: "Deep work: Prepare SaaS architecture plan" },
+    { id: 420, day: 192, text: "Plan: how to turn your agency system into a self-serve SaaS product" },
+    { id: 421, day: 193, text: "Define SaaS MVP features: what is the minimum that works without you?" },
+    { id: 422, day: 193, text: "Write a 1-page product spec" },
+    { id: 423, day: 194, text: "Study Next.js 14 App Router in depth" },
+    { id: 424, day: 194, text: "Build SaaS frontend skeleton with auth (NextAuth)" },
+    { id: 425, day: 195, text: "Build Supabase schema for multi-tenant SaaS: users, workspaces, pipelines, content" },
+    { id: 426, day: 196, text: "Write LinkedIn: 'Month 6 done – building toward SaaS now. Here's my plan.'" },
+    { id: 427, day: 197, text: "Build SaaS onboarding flow: sign up → connect social accounts → set niche → go" },
+    { id: 428, day: 198, text: "Build OAuth connection for YouTube (bring-your-own-account model)" },
+    { id: 429, day: 199, text: "Deep work: Build workspace isolation – each user only sees their own data" },
+    { id: 430, day: 200, text: "Add Stripe subscription to SaaS: Free trial → ₹1,999/month → ₹9,999/month" },
+    { id: 431, day: 201, text: "Test full SaaS signup + subscription flow in Stripe test mode" },
+    { id: 432, day: 202, text: "Build a waitlist landing page for the SaaS product" },
+    { id: 433, day: 202, text: "Collect emails with a launch bonus offer" },
+    { id: 434, day: 203, text: "Write LinkedIn: 'I'm building an AI Creator OS – join the waitlist'" },
+    { id: 435, day: 204, text: "Promote waitlist: post in AI communities, Reddit, IndieHackers, Product Hunt upcoming" },
+    { id: 436, day: 205, text: "Deep work: Build the core pipeline into the SaaS backend" },
+    { id: 437, day: 205, text: "Each user's pipeline runs independently in isolated containers" },
+    { id: 438, day: 206, text: "Study Docker Compose + multi-container orchestration" },
+    { id: 439, day: 206, text: "Set up: FastAPI + Redis + Worker per user workspace" },
+    { id: 440, day: 207, text: "Test multi-user pipeline: 3 users generating content simultaneously" },
+    { id: 441, day: 208, text: "Fix concurrency bugs and resource conflicts" },
+    { id: 442, day: 209, text: "Build usage limits per plan: free = 5 videos/month, starter = 30, pro = unlimited" },
+    { id: 443, day: 210, text: "Write LinkedIn: 'Phase 2 done – here's everything I built in 4 months'" },
+    { id: 444, day: 211, text: "Define SaaS v1 launch date: aim for Day 270" },
+    { id: 445, day: 211, text: "Work backward to create a launch checklist" },
+    { id: 446, day: 212, text: "Build SaaS feature: Trend Discovery – keyword input → top 10 trending topics shown" },
+    { id: 447, day: 213, text: "Build SaaS feature: Script Generator – topic → full video script with hook, body, CTA" },
+    { id: 448, day: 214, text: "Deep work: Build SaaS feature: Voice Generator – script → ElevenLabs voice → MP3 download" },
+    { id: 449, day: 215, text: "Build SaaS feature: Video Generator – script + voice → assembled video" },
+    { id: 450, day: 216, text: "Build SaaS feature: Approval Dashboard – review video, edit script, approve or reject" },
+    { id: 451, day: 217, text: "Write LinkedIn: 'Building AI Creator OS in public – week 1 progress'" },
+    { id: 452, day: 218, text: "Build SaaS feature: Publisher – approved video → post to YouTube + Instagram + LinkedIn" },
+    { id: 453, day: 219, text: "Build SaaS feature: Analytics – view stats per video per platform" },
+    { id: 454, day: 220, text: "Deep work: Build SaaS feature: Content Calendar – schedule posts for 30 days" },
+    { id: 455, day: 221, text: "Build SaaS feature: Brand Voice – upload sample content → extract tone profile" },
+    { id: 456, day: 222, text: "Build SaaS feature: Competitor Watch – track competitor channels, alert on new uploads" },
+    { id: 457, day: 223, text: "Build SaaS feature: A/B Testing – run 2 title/thumbnail variations, auto-pick winner" },
+    { id: 458, day: 224, text: "Write LinkedIn: 'Building AI Creator OS in public – week 2: all core features done'" },
+    { id: 459, day: 225, text: "Build SaaS admin panel: view all users, usage, revenue, churn" },
+    { id: 460, day: 226, text: "Add feature flags system: turn features on/off per plan without code deploy" },
+    { id: 461, day: 227, text: "Deep work: Build SaaS email system" },
+    { id: 462, day: 227, text: "Automated emails: welcome, weekly digest, billing alerts, usage warnings" },
+    { id: 463, day: 228, text: "Set up customer support chat (Crisp or Intercom free tier) in SaaS" },
+    { id: 464, day: 229, text: "Write help documentation for all 8 SaaS features" },
+    { id: 465, day: 230, text: "Record 8 tutorial videos (2 min each) for each feature" },
+    { id: 466, day: 230, text: "Host on YouTube unlisted" },
+    { id: 467, day: 231, text: "Write LinkedIn: 'Why I built AI Creator OS (the full story)'" },
+    { id: 468, day: 232, text: "Run internal QA: test every feature as a new user" },
+    { id: 469, day: 232, text: "Log every bug in Notion" },
+    { id: 470, day: 232, text: "Fix critical bugs first" },
+    { id: 471, day: 233, text: "Invite 5 beta testers from your waitlist" },
+    { id: 472, day: 233, text: "Give free access in exchange for detailed feedback" },
+    { id: 473, day: 234, text: "Deep work: Act on beta feedback – top 3 changes based on user pain points" },
+    { id: 474, day: 235, text: "Run beta test round 2 with 5 more testers" },
+    { id: 475, day: 235, text: "Focus on: onboarding clarity, video quality, publish reliability" },
+    { id: 476, day: 236, text: "Fix all critical bugs found in beta round 2" },
+    { id: 477, day: 237, text: "Stress test: simulate 50 users generating content simultaneously" },
+    { id: 478, day: 237, text: "Fix any crashes" },
+    { id: 479, day: 238, text: "Write LinkedIn: 'Beta testing AI Creator OS – here's what users said'" },
+    { id: 480, day: 239, text: "Build public changelog page: show new features and fixes by date" },
+    { id: 481, day: 240, text: "Build affiliate program: influencers get 30% recurring commission for referrals" },
+    { id: 482, day: 241, text: "Deep work: Set up production infrastructure" },
+    { id: 483, day: 241, text: "Move from free tiers to paid: Railway/Render, Supabase Pro, Vercel Pro" },
+    { id: 484, day: 242, text: "Set up monitoring: Sentry for error tracking, Uptime Robot for availability" },
+    { id: 485, day: 243, text: "Configure automated database backups to S3" },
+    { id: 486, day: 244, text: "Set up CI/CD: GitHub Actions → test → build → deploy on every push" },
+    { id: 487, day: 245, text: "Write LinkedIn: 'AI Creator OS goes to production – what we built behind the scenes'" },
+    { id: 488, day: 246, text: "Plan SaaS launch strategy: Product Hunt, LinkedIn, IndieHackers, Twitter/X" },
+    { id: 489, day: 246, text: "Set launch date: Day 270" },
+    { id: 490, day: 247, text: "Write Product Hunt launch copy: tagline, description, first comment" },
+    { id: 491, day: 247, text: "Schedule for launch day" },
+    { id: 492, day: 248, text: "Build launch-day email to waitlist (1,000+ if possible)" },
+    { id: 493, day: 249, text: "Deep work: Prepare 5 launch-day LinkedIn posts (schedule them)" },
+    { id: 494, day: 249, text: "Types: founder story, demo video, feature highlight, pricing reveal, social proof" },
+    { id: 495, day: 250, text: "Prepare 3 Reddit posts for: r/SaaS, r/AItools, r/entrepreneur" },
+    { id: 496, day: 250, text: "Don't spam – add value first" },
+    { id: 497, day: 251, text: "Record a 90-second product demo video for launch" },
+    { id: 498, day: 251, text: "Show: sign up → generate video → approve → post. All in under 3 minutes." },
+    { id: 499, day: 252, text: "Write LinkedIn: 'We launch in 18 days – here's everything AI Creator OS can do'" },
+    { id: 500, day: 253, text: "Reach out to 10 AI/SaaS newsletters to feature your launch" },
+    { id: 501, day: 253, text: "Offer: exclusive early access or commission" },
+    { id: 502, day: 254, text: "Contact 5 YouTube creators in AI niche for collaboration or review" },
+    { id: 503, day: 255, text: "Deep work: Build referral tracking in the SaaS – users get credit for referrals" },
+    { id: 504, day: 256, text: "Add social proof to landing page: beta tester quotes, video testimonials if possible" },
+    { id: 505, day: 257, text: "Set up live chat support for launch week – you will be on call" },
+    { id: 506, day: 258, text: "Do a final pre-launch checklist: billing, auth, publishing, analytics – all working?" },
+    { id: 507, day: 259, text: "Write LinkedIn: 'Launch in 11 days – here's our pricing and why'" },
+    { id: 508, day: 260, text: "Build a launch countdown on the landing page" },
+    { id: 509, day: 260, text: "Add email capture for last-minute waitlist signups" },
+    { id: 510, day: 261, text: "Prepare customer success playbook: what to do if a user is stuck" },
+    { id: 511, day: 262, text: "Deep work: Optimize landing page for conversions" },
+    { id: 512, day: 262, text: "A/B test headline, CTA button, and hero video" },
+    { id: 513, day: 263, text: "Prepare launch-day Slack/Discord community for early users" },
+    { id: 514, day: 264, text: "Finalize all launch assets: screenshots, demo GIF, banner images" },
+    { id: 515, day: 265, text: "Do a full dry run: onboard yourself as a brand-new user, time every step" },
+    { id: 516, day: 266, text: "Write LinkedIn: 'Launching AI Creator OS in 4 days'" },
+    { id: 517, day: 267, text: "Pre-launch: post teaser on all platforms" },
+    { id: 518, day: 267, text: "Reply to every comment personally" },
+    { id: 519, day: 268, text: "Pre-launch: send final email to waitlist with launch day details" },
+    { id: 520, day: 269, text: "Pre-launch day: fix any last-minute bugs found today" },
+    { id: 521, day: 270, text: "🚀 LAUNCH DAY: Post Product Hunt, LinkedIn, Reddit, email blast, Twitter/X at 9AM IST" },
+    { id: 522, day: 270, text: "Respond to every comment, message, and signup personally all day" },
+    { id: 523, day: 271, text: "Post-launch day 1: share results publicly on LinkedIn (signups, MRR, feedback)" },
+    { id: 524, day: 271, text: "Continue responding to all inbound" },
+    { id: 525, day: 272, text: "Post-launch day 2: onboard all new users personally via chat" },
+    { id: 526, day: 272, text: "Note every issue they hit" },
+    { id: 527, day: 273, text: "Write LinkedIn: 'We just launched. Here's what happened in the first 72 hours.'" },
+    { id: 528, day: 274, text: "Fix top 5 bugs and UX issues from launch week" },
+    { id: 529, day: 274, text: "Deploy fixes within 48 hours of launch" },
+    { id: 530, day: 275, text: "Add quick-win features requested by most users" },
+    { id: 531, day: 275, text: "Prioritize by frequency" },
+    { id: 532, day: 276, text: "Deep work: Build 'Concierge Onboarding' – you personally onboard first 50 users via video call" },
+    { id: 533, day: 277, text: "Write LinkedIn: '7 days post-launch – real numbers, real feedback'" },
+    { id: 534, day: 278, text: "Study SEO for SaaS landing pages" },
+    { id: 535, day: 278, text: "Write 3 SEO blog posts targeting: 'AI video automation tool', 'automated content creation', 'AI social media manager'" },
+    { id: 536, day: 279, text: "Publish blog posts on your site and share on LinkedIn" },
+    { id: 537, day: 279, text: "These drive long-term organic traffic" },
+    { id: 538, day: 280, text: "Write LinkedIn: 'Month 9 done – SaaS launched. What's next?'" },
+    { id: 539, day: 281, text: "Set up cold email outreach for SaaS: target content agencies and coaches" },
+    { id: 540, day: 281, text: "Use Apollo.io free tier for leads" },
+    { id: 541, day: 282, text: "Send 50 cold emails for SaaS trial signups" },
+    { id: 542, day: 282, text: "Track open rate, reply rate, conversion" },
+    { id: 543, day: 283, text: "Deep work: Build 'Affiliate Dashboard' – affiliates see their referrals, commission, payout status" },
+    { id: 544, day: 284, text: "Recruit 10 affiliates from your LinkedIn network" },
+    { id: 545, day: 284, text: "Offer 30% recurring commission" },
+    { id: 546, day: 285, text: "Build a testimonial collection system: after 30 days, auto-ask users for a review" },
+    { id: 547, day: 286, text: "Add testimonials and case studies to landing page with real metrics" },
+    { id: 548, day: 287, text: "Write LinkedIn: 'Month 10 MRR update – and the strategies driving it'" },
+    { id: 549, day: 288, text: "Study churn analysis: why are users cancelling?" },
+    { id: 550, day: 288, text: "Run exit surveys on cancelled accounts" },
+    { id: 551, day: 289, text: "Build retention feature: 'Content Performance Coach' – weekly AI insight on what's working" },
+    { id: 552, day: 290, text: "Deep work: Build enterprise tier features: team collaboration, shared workspaces, admin controls" },
+    { id: 553, day: 291, text: "Reach out to 3 digital agencies for enterprise pilot (₹50,000+/month)" },
+    { id: 554, day: 292, text: "Build a custom enterprise onboarding flow: dedicated account manager (you, initially)" },
+    { id: 555, day: 293, text: "Study investor pitch basics – prepare a 1-pager if you ever want to raise funding" },
+    { id: 556, day: 294, text: "Write LinkedIn: 'Building an AI SaaS while working a full-time job – honest update'" },
+    { id: 557, day: 295, text: "Deep work: Build API access tier for developers" },
+    { id: 558, day: 295, text: "Developers can integrate your pipeline into their own apps" },
+    { id: 559, day: 296, text: "Write API documentation using Mintlify or ReadMe.io" },
+    { id: 560, day: 297, text: "Launch developer API tier on Product Hunt as a follow-up launch" },
+    { id: 561, day: 298, text: "Set ₹9,999/month as the API tier price" },
+    { id: 562, day: 298, text: "Pitch to 5 software agencies" },
+    { id: 563, day: 299, text: "Review Phase 3 progress: MRR, users, churn, NPS, top features" },
+    { id: 564, day: 299, text: "Write a detailed retrospective" },
+    { id: 565, day: 300, text: "Write LinkedIn: 'Phase 3 done – AI Creator OS is live and growing'" },
+    { id: 566, day: 301, text: "Set Phase 4 goals: reach ₹8L MRR, 10,000 LinkedIn followers, 1 enterprise client" },
+    { id: 567, day: 302, text: "Study YouTube SEO and growth strategy" },
+    { id: 568, day: 302, text: "Start a YouTube channel: 'AI Business Systems'" },
+    { id: 569, day: 302, text: "Upload intro video: 'Why I quit selling my time'" },
+    { id: 570, day: 303, text: "Create a content calendar for your YouTube channel: 1 video/week for 12 weeks" },
+    { id: 571, day: 304, text: "Deep work: Record and edit YouTube video 1: 'How I automated my entire content business with AI'" },
+    { id: 572, day: 305, text: "Publish YouTube video 1 and promote on LinkedIn, Twitter, Reddit" },
+    { id: 573, day: 306, text: "Study Twitter/X growth strategy" },
+    { id: 574, day: 306, text: "Post 3x daily: build threads, hooks, behind-the-scenes" },
+    { id: 575, day: 307, text: "Write LinkedIn: 'Why I started sharing my AI journey publicly'" },
+    { id: 576, day: 308, text: "Build 'AI Growth Dashboard': tracks your personal brand metrics across all platforms" },
+    { id: 577, day: 309, text: "Study newsletter growth: ConvertKit, Beehiiv, or Substack" },
+    { id: 578, day: 309, text: "Launch a weekly AI newsletter: 'The AI Builder'" },
+    { id: 579, day: 310, text: "Write first newsletter issue: 'The AI systems I built in 9 months'" },
+    { id: 580, day: 310, text: "Publish and share the link everywhere" },
+    { id: 581, day: 311, text: "Deep work: Record YouTube video 2: 'Building an AI content pipeline from scratch (full tutorial)'" },
+    { id: 582, day: 312, text: "Repurpose YouTube video 2 into: 5 LinkedIn posts, 3 Twitter threads, 1 newsletter issue" },
+    { id: 583, day: 313, text: "Study lead magnet strategy" },
+    { id: 584, day: 313, text: "Build a free resource: '10 n8n Workflows for AI Automation' PDF" },
+    { id: 585, day: 314, text: "Write LinkedIn: 'Free resource: 10 n8n AI workflows (download link in comments)'" },
+    { id: 586, day: 315, text: "Run a LinkedIn poll: 'Which AI automation would help your business most?'" },
+    { id: 587, day: 315, text: "Use results to plan next content" },
+    { id: 588, day: 316, text: "Deep work: Build a community around your brand – Discord or Circle.so" },
+    { id: 589, day: 316, text: "Focus: AI builders and founders" },
+    { id: 590, day: 317, text: "Invite first 50 community members from LinkedIn DMs" },
+    { id: 591, day: 318, text: "Host first community Q&A session: 'How I built an AI content OS in 10 months'" },
+    { id: 592, day: 319, text: "Study podcast strategy" },
+    { id: 593, day: 319, text: "Apply to be a guest on 3 AI/entrepreneur podcasts" },
+    { id: 594, day: 320, text: "Prepare podcast talking points: your story, key insights, tactical advice" },
+    { id: 595, day: 321, text: "Write LinkedIn: 'I started a community for AI builders. Here's why.'" },
+    { id: 596, day: 322, text: "Deep work: Record YouTube video 3: 'I built a ₹1Cr AI business while working full-time – here's how'" },
+    { id: 597, day: 323, text: "Study SEO content strategy for SaaS: comparison articles, alternatives pages" },
+    { id: 598, day: 324, text: "Write and publish: 'AI Creator OS vs Jasper vs Copy.ai – which is best for video automation?'" },
+    { id: 599, day: 325, text: "Write and publish: 'Top 5 AI content automation tools in 2026'" },
+    { id: 600, day: 326, text: "Set up Semrush or Ahrefs free trial to track keyword rankings" },
+    { id: 601, day: 327, text: "Build a backlink outreach list: 20 AI blogs and newsletters to pitch guest posts" },
+    { id: 602, day: 328, text: "Write LinkedIn: 'Month 11 – content marketing is now driving SaaS signups organically'" },
+    { id: 603, day: 329, text: "Write and publish guest post 1: submitted to an AI newsletter" },
+    { id: 604, day: 330, text: "Deep work: Build 'AI Creator OS Partner Program' – agencies resell at markup" },
+    { id: 605, day: 331, text: "Recruit 3 agency partners with a revenue-share deal" },
+    { id: 606, day: 332, text: "Build a partner onboarding kit: sales deck, demo access, commission portal" },
+    { id: 607, day: 333, text: "Study product-led growth (PLG): freemium models, viral loops, in-product referrals" },
+    { id: 608, day: 334, text: "Add an in-product referral prompt after user's first successful video publish" },
+    { id: 609, day: 335, text: "Write LinkedIn: 'How product-led growth doubled our SaaS signups in 2 weeks'" },
+    { id: 610, day: 336, text: "Do a full financial review: MRR, burn rate, profit, runway" },
+    { id: 611, day: 336, text: "Aim for ₹8L MRR by Day 365" },
+    { id: 612, day: 337, text: "Deep work: Build annual plan report for clients" },
+    { id: 613, day: 337, text: "AI generates a full year-in-review for each client account" },
+    { id: 614, day: 338, text: "Launch 'Annual Plan' discount: 2 months free for yearly subscription" },
+    { id: 615, day: 338, text: "Run for 2 weeks" },
+    { id: 616, day: 339, text: "Study cold outreach at scale: Instantly.ai or Smartlead" },
+    { id: 617, day: 339, text: "Build a 100-email sequence for SaaS" },
+    { id: 618, day: 340, text: "Launch cold outreach campaign targeting 500 content agencies globally" },
+    { id: 619, day: 341, text: "Track results daily: open rate, reply rate, demo booked, conversion" },
+    { id: 620, day: 342, text: "Write LinkedIn: 'Month 11 done – cold email is now our #2 growth channel'" },
+    { id: 621, day: 343, text: "Deep work: Record YouTube video 4: 'The exact tech stack of a ₹1Cr AI SaaS (2026)'" },
+    { id: 622, day: 344, text: "Repurpose video 4 into: LinkedIn carousel, Twitter thread, newsletter issue" },
+    { id: 623, day: 345, text: "Study retention playbooks: onboarding email sequences, feature education drips" },
+    { id: 624, day: 346, text: "Build a 14-day email onboarding sequence for new SaaS users" },
+    { id: 625, day: 346, text: "Day 1: welcome, Day 3: first video tip, Day 7: publish success, Day 14: upgrade nudge" },
+    { id: 626, day: 347, text: "Test onboarding sequence on 10 new users" },
+    { id: 627, day: 347, text: "Measure activation rate improvement" },
+    { id: 628, day: 348, text: "Study churn win-back: email sequence for cancelled users offering a discount or new feature" },
+    { id: 629, day: 349, text: "Write LinkedIn: 'We reduced churn by 20% with one email sequence – here's exactly what we did'" },
+    { id: 630, day: 350, text: "Deep work: Build 'AI Creator OS 2.0 Roadmap' – plan next 6 months of features" },
+    { id: 631, day: 351, text: "Share roadmap publicly on LinkedIn and in the community" },
+    { id: 632, day: 351, text: "Ask for upvotes and feedback" },
+    { id: 633, day: 352, text: "Hire first part-time developer to take over maintenance and bug fixes" },
+    { id: 634, day: 352, text: "Free your time for growth" },
+    { id: 635, day: 353, text: "Hire a part-time content creator to repurpose your content across platforms" },
+    { id: 636, day: 354, text: "Study how to build a team on a budget: Fiverr, Toptal, LinkedIn" },
+    { id: 637, day: 355, text: "Define your role: you are the product visionary and growth driver, not the builder anymore" },
+    { id: 638, day: 356, text: "Write LinkedIn: 'I hired my first team member. Here's how I decided to do it.'" },
+    { id: 639, day: 357, text: "Deep work: Build a personal brand website: yourname.com" },
+    { id: 640, day: 357, text: "Include: story, services, SaaS product, newsletter, speaking" },
+    { id: 641, day: 358, text: "Write a long-form 'Year 1 retrospective' post – the full story from Day 1 to Day 365" },
+    { id: 642, day: 359, text: "Publish the retrospective on LinkedIn, newsletter, and your website" },
+    { id: 643, day: 360, text: "Study how to prepare for speaking at events" },
+    { id: 644, day: 360, text: "Apply to 2 AI or startup conferences to speak" },
+    { id: 645, day: 361, text: "Record your final YouTube video: 'I built a ₹1Cr AI business in 365 days – here's everything'" },
+    { id: 646, day: 362, text: "Create a free course or workshop from your 365-day journey" },
+    { id: 647, day: 362, text: "Host on Gumroad or Lemon Squeezy" },
+    { id: 648, day: 363, text: "Launch the free course/workshop to your audience" },
+    { id: 649, day: 363, text: "Upsell: community membership or personalized coaching" },
+    { id: 650, day: 364, text: "Do a final financial review: total MRR, total revenue, profit, team size" },
+    { id: 651, day: 364, text: "Celebrate every milestone" },
+    { id: 652, day: 365, text: "Write LinkedIn: 'Day 365 – I did it. Here's the full ₹1Cr AI journey.'" },
+    { id: 653, day: 365, text: "Share your final MRR number publicly" },
+    { id: 654, day: 365, text: "Plan Year 2" },
+];
 
-        function initApp() {
-            renderDashboard();
-            renderChart();
-        }
+let S={day:1,done:[],history:{},custom:{}};
+let myChart=null;
+let browseDay=1;
 
-        // --- 4. CORE LOGIC ---
-        function toggleTask(taskId) {
-            if (completedTaskIds.includes(taskId)) {
-                completedTaskIds = completedTaskIds.filter(id => id !== taskId);
-            } else {
-                completedTaskIds.push(taskId);
-            }
-            saveState();
-            renderDashboard();
-            updateChartData();
-        }
+function unlock(){
+  const v=document.getElementById("pi").value;
+  if(v===SECRET){
+    document.getElementById("lock").style.display="none";
+    document.getElementById("app").style.display="block";
+    loadCloud();
+  } else {
+    const e=document.getElementById("lerr");
+    e.textContent="Incorrect password. Try again.";
+    document.getElementById("pi").value="";
+    setTimeout(()=>e.textContent="",3000);
+  }
+}
 
-        function saveState() {
-            localStorage.setItem('taskApp_day', currentDay);
-            localStorage.setItem('taskApp_completed', JSON.stringify(completedTaskIds));
-            
-            // Save today's final score to history
-            const todayTasks = allTasks.filter(t => t.day === currentDay);
-            const scorePerTask = todayTasks.length > 0 ? MAX_SCORE_PER_DAY / todayTasks.length : 0;
-            const completedToday = todayTasks.filter(t => completedTaskIds.includes(t.id)).length;
-            const todayScore = Math.round(completedToday * scorePerTask);
-            
-            dailyHistory[currentDay] = todayScore;
-            localStorage.setItem('taskApp_history', JSON.stringify(dailyHistory));
-        }
+function sync(s,m){
+  const b=document.getElementById("sbar");
+  b.className=s;
+  document.getElementById("slbl").textContent=m;
+}
 
-        function advanceDay() {
-            saveState(); // Ensure today is saved
-            currentDay++;
-            localStorage.setItem('taskApp_day', currentDay);
-            renderDashboard();
-            updateChartData();
-        }
+async function loadCloud(){
+  sync("saving","Loading from cloud…");
+  try{
+    const r=await window.storage.get(SK);
+    if(r&&r.value) S={...S,...JSON.parse(r.value)};
+    sync("ok","Synced · "+new Date().toLocaleTimeString());
+  } catch(e){ sync("ok","New journey started ✨"); }
+  document.getElementById("ldg").style.display="none";
+  document.getElementById("mc").style.display="block";
+  browseDay=S.day;
+  render();
+  renderChart();
+  renderBrowse();
+}
 
-        // --- 5. UI RENDERING ---
-        function renderDashboard() {
-            document.getElementById('current-day').innerText = currentDay;
-            document.getElementById('mission-day').innerText = currentDay;
-            
-            const taskList = document.getElementById('task-list');
-            taskList.innerHTML = '';
+async function saveCloud(){
+  sync("saving","Saving…");
+  try{
+    await window.storage.set(SK,JSON.stringify(S));
+    sync("ok","Saved · "+new Date().toLocaleTimeString());
+  } catch(e){ sync("err","Save failed"); }
+}
 
-            // Get tasks up to current day that are incomplete, PLUS all of today's tasks
-            const activeTasks = allTasks.filter(t => 
-                (t.day === currentDay) || (t.day < currentDay && !completedTaskIds.includes(t.id))
-            );
+function phase(d){
+  if(d<=90) return{l:"Phase 1 – Freelancing",c:"#f69206"};
+  if(d<=210) return{l:"Phase 2 – Productized",c:"#a855f7"};
+  if(d<=300) return{l:"Phase 3 – SaaS Build",c:"#3b82f6"};
+  return{l:"Phase 4 – Scale & Brand",c:"#22c55e"};
+}
 
-            let todayTotalEarned = 0;
-            let grandTotalScore = 0;
+function tasksForDay(d){
+  const base=allTasks.filter(t=>t.day===d);
+  const cust=(S.custom[d]||[]).map(c=>({id:"c_"+c.id,day:d,text:c.text,custom:true}));
+  return [...base,...cust];
+}
 
-            // Calculate historical total score
-            for (let d = 1; d < currentDay; d++) {
-                if (dailyHistory[d]) grandTotalScore += dailyHistory[d];
-            }
+function todayScore(){
+  const t=tasksForDay(S.day);
+  if(!t.length) return 0;
+  const pts=MSCORE/t.length;
+  const done=t.filter(t=>S.done.includes(t.id)).length;
+  return Math.round(done*pts);
+}
 
-            activeTasks.forEach(task => {
-                // Calculate points dynamically based on how many tasks were assigned to that specific day
-                const tasksForThisDay = allTasks.filter(t => t.day === task.day).length;
-                const pointsValue = Math.round(MAX_SCORE_PER_DAY / tasksForThisDay);
-                
-                const isCompleted = completedTaskIds.includes(task.id);
-                
-                if (isCompleted && task.day === currentDay) {
-                    todayTotalEarned += pointsValue;
-                }
+function totalScore(){
+  let total=0;
+  for(let d=1;d<S.day;d++) total+=S.history[d]||0;
+  total+=todayScore();
+  return total;
+}
 
-                const li = document.createElement('li');
-                li.className = `task-item ${isCompleted ? 'completed' : ''}`;
-                li.innerHTML = `
-                    <input type="checkbox" ${isCompleted ? 'checked' : ''} onchange="toggleTask(${task.id})">
-                    <span class="text">${task.text} ${task.day < currentDay ? '<b style="color:red">(Overdue Day '+task.day+')</b>' : ''}</span>
-                    <span class="task-points">${pointsValue} pts</span>
-                `;
-                taskList.appendChild(
-                    li);
-            });
+function streak(){
+  let s=0;
+  for(let d=S.day-1;d>=1;d--){
+    if((S.history[d]||0)>0) s++;
+    else break;
+  }
+  return s;
+}
 
-            grandTotalScore += todayTotalEarned;
-            
-            document.getElementById('today-score').innerText = `${todayTotalEarned} / 100`;
-            document.getElementById('total-score').innerText = grandTotalScore;
-        }
+function showTab(id){
+  document.querySelectorAll(".tab").forEach((t,i)=>{
+    const ids=["today","browse","stats"];
+    t.classList.toggle("on",ids[i]===id);
+  });
+  document.querySelectorAll(".panel").forEach(p=>p.classList.remove("on"));
+  document.getElementById("tab-"+id).classList.add("on");
+  if(id==="stats") updateChart();
+  if(id==="browse") renderBrowse();
+}
 
-        // --- 6. CHART.JS INTEGRATION ---
-        function renderChart() {
-            const ctx = document.getElementById('progressChart').getContext('2d');
-            
-            const labels = [];
-            const data = [];
-            
-            for (let i = 1; i <= currentDay; i++) {
-                labels.push(`Day ${i}`);
-                data.push(dailyHistory[i] || 0); // Default to 0 if no history
-            }
+function render(){
+  const d=S.day;
+  const ts=todayScore();
+  const tot=totalScore();
+  const str=streak();
+  const pct=Math.round((d/MAXDAY)*100);
+  const ph=phase(d);
 
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Daily Score',
-                        data: data,
-                        borderColor: '#f69206',
-                        backgroundColor: 'rgba(246, 146, 6, 0.2)',
-                        borderWidth: 2,
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: { beginAtZero: true, max: 100 }
-                    }
-                }
-            });
-        }
+  document.getElementById("s-day").textContent=d;
+  document.getElementById("s-today").textContent=ts+"/100";
+  document.getElementById("s-total").textContent=tot;
+  document.getElementById("s-str").textContent=str+"🔥";
+  document.getElementById("ppct").textContent=pct+"%";
+  document.getElementById("pfill").style.width=pct+"%";
+  document.getElementById("dchip").textContent="Day "+d;
+  const pb=document.getElementById("pbadge");
+  pb.textContent=ph.l;pb.style.color=ph.c;
+  pb.style.background=ph.c+"1a";pb.style.borderColor=ph.c+"44";
 
-        function updateChartData() {
-            if (!myChart) return;
-            const labels = [];
-            const data = [];
-            for (let i = 1; i <= currentDay; i++) {
-                labels.push(`Day ${i}`);
-                data.push(dailyHistory[i] || 0);
-            }
-            myChart.data.labels = labels;
-            myChart.data.datasets[0].data = data;
-            
-            // Inject current day's active score into the graph instantly
-            const todayTasks = allTasks.filter(t => t.day === currentDay);
-            const scorePerTask = todayTasks.length > 0 ? MAX_SCORE_PER_DAY / todayTasks.length : 0;
-            const completedToday = todayTasks.filter(t => completedTaskIds.includes(t.id)).length;
-            myChart.data.datasets[0].data[currentDay - 1] = Math.round(completedToday * scorePerTask);
+  renderTodayTasks();
+}
 
-            myChart.update();
-        }
-    </script>
+function renderTodayTasks(){
+  const d=S.day;
+  const list=document.getElementById("tlist");
+  list.innerHTML="";
+
+  const active=allTasks.filter(t=>t.day===d||(t.day<d&&!S.done.includes(t.id)));
+  const custToday=(S.custom[d]||[]).map(c=>({id:"c_"+c.id,day:d,text:c.text,custom:true}));
+  const all=[...active,...custToday];
+
+  if(!all.length){
+    list.innerHTML='<div style="text-align:center;color:var(--mu);padding:24px;font-size:13px">🎉 All done for today!</div>';
+    return;
+  }
+  all.forEach(t=>list.appendChild(makeTaskEl(t,d,false)));
+}
+
+function makeTaskEl(t,viewDay,isReadOnly){
+  const isDone=S.done.includes(t.id);
+  const isOverdue=t.day<viewDay;
+  const isCust=t.custom||String(t.id).startsWith("c_");
+  const el=document.createElement("div");
+  let cls="task"+(isDone?" done":"")+(isOverdue?" overdue":"")+(isCust?" custom-t":"")+(isReadOnly?" viewing":"");
+  el.className=cls;
+  if(!isReadOnly) el.onclick=()=>toggleTask(t.id,viewDay);
+
+  const baseCount=allTasks.filter(x=>x.day===t.day).length+(S.custom[t.day]||[]).length;
+  const pts=Math.round(MSCORE/Math.max(1,baseCount));
+
+  let tags="";
+  if(isOverdue) tags+='<span class="ttag overdue">Overdue Day '+t.day+'</span>';
+  if(isCust) tags+='<span class="ttag custom">Custom</span>';
+  const delBtn=isCust&&!isReadOnly?'<button class="del-btn" onclick="event.stopPropagation();delCustom(\"'+t.id+'\",'+t.day+')" title="Delete">×</button>':'';
+
+  el.innerHTML='<div class="tchk"><svg width="11" height="9" viewBox="0 0 11 9" fill="none"><path d="M1 4.5l3 3L10 1" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><span class="ttext">'+esc(t.text)+'</span>'+tags+'<span class="tpts">'+pts+'pts</span>'+delBtn;
+  return el;
+}
+
+function toggleTask(id,day){
+  if(S.done.includes(id)) S.done=S.done.filter(x=>x!==id);
+  else S.done.push(id);
+  S.history[day]=S.history[day]||0;
+  if(day===S.day) S.history[S.day]=todayScore();
+  render();
+  saveCloud();
+}
+
+function addCustom(){
+  const inp=document.getElementById("cinput");
+  const txt=inp.value.trim();
+  if(!txt) return;
+  const d=S.day;
+  if(!S.custom[d]) S.custom[d]=[];
+  const uid=Date.now();
+  S.custom[d].push({id:uid,text:txt});
+  inp.value="";
+  render();
+  saveCloud();
+}
+
+function delCustom(cid,day){
+  if(!S.custom[day]) return;
+  const rawId=cid.replace("c_","");
+  S.custom[day]=S.custom[day].filter(c=>String(c.id)!==String(rawId));
+  S.done=S.done.filter(x=>x!==cid);
+  render();
+  saveCloud();
+}
+
+function advDay(){
+  S.history[S.day]=todayScore();
+  if(S.day<MAXDAY) S.day++;
+  browseDay=S.day;
+  render();
+  updateChart();
+  saveCloud();
+  document.getElementById("tlist").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* ── BROWSE ── */
+function renderBrowse(){
+  const d=browseDay;
+  document.getElementById("bn-label").textContent="Day "+d;
+  document.getElementById("bn-prev").disabled=d<=1;
+  document.getElementById("bn-next").disabled=d>=MAXDAY;
+
+  const isToday=d===S.day;
+  const isPast=d<S.day;
+  const bc=document.getElementById("browse-content");
+  bc.innerHTML="";
+
+  if(!isToday){
+    const banner=document.createElement("div");
+    banner.className="view-banner";
+    const score=isPast?(S.history[d]||0):"—";
+    const label=isPast?"Past day · Score: "+score+"/100":d>S.day?"Upcoming day":"";
+    banner.innerHTML='<span>'+label+'</span><button onclick="S.day=browseDay='+d+';render();showTab(\'today\')">Jump to this day</button>';
+    bc.appendChild(banner);
+  }
+
+  const tasks=tasksForDay(d);
+  if(!tasks.length){
+    bc.innerHTML+='<div style="text-align:center;color:var(--mu);padding:24px;font-size:13px">No tasks for this day.</div>';
+    return;
+  }
+
+  const ph=phase(d);
+  const phEl=document.createElement("div");
+  phEl.style.cssText="font-size:11px;color:"+ph.c+";margin-bottom:10px;font-family:'JetBrains Mono',monospace";
+  phEl.textContent=ph.l+" · Day "+d+"/365";
+  bc.appendChild(phEl);
+
+  tasks.forEach(t=>{
+    const el=makeTaskEl(t,d,true);
+    bc.appendChild(el);
+  });
+
+  if(!isToday){
+    const addNote=document.createElement("div");
+    addNote.className="add-box";
+    addNote.style.marginTop="10px";
+    addNote.innerHTML='<h4>+ Add custom task for Day '+d+'</h4><div class="add-row"><input type="text" id="binput" placeholder="Custom task for Day '+d+'…" onkeydown="if(event.key===\'Enter\')addCustomBrowse('+d+')"><button onclick="addCustomBrowse('+d+')">Add</button></div>';
+    bc.appendChild(addNote);
+  }
+}
+
+function addCustomBrowse(day){
+  const inp=document.getElementById("binput");
+  const txt=inp.value.trim();
+  if(!txt) return;
+  if(!S.custom[day]) S.custom[day]=[];
+  S.custom[day].push({id:Date.now(),text:txt});
+  inp.value="";
+  renderBrowse();
+  if(day===S.day) render();
+  saveCloud();
+}
+
+function browseNav(dir){
+  browseDay=Math.max(1,Math.min(MAXDAY,browseDay+dir));
+  renderBrowse();
+}
+
+function jumpTo(){
+  const v=parseInt(document.getElementById("jmp").value);
+  if(v>=1&&v<=MAXDAY){ browseDay=v; renderBrowse(); }
+  document.getElementById("jmp").value="";
+}
+
+/* ── CHART ── */
+function renderChart(){
+  const ctx=document.getElementById("chart").getContext("2d");
+  const labels=[],data=[];
+  for(let i=1;i<=S.day;i++){
+    labels.push("D"+i);
+    data.push(i===S.day?todayScore():S.history[i]||0);
+  }
+  myChart=new Chart(ctx,{
+    type:"line",
+    data:{labels,datasets:[{
+      label:"Score",data,
+      borderColor:"#f69206",
+      backgroundColor:"rgba(246,146,6,0.07)",
+      borderWidth:2,fill:true,tension:.4,
+      pointRadius:data.length<=40?2:0,
+      pointHoverRadius:5,pointBackgroundColor:"#f69206"
+    }]},
+    options:{
+      responsive:true,animation:{duration:250},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>" Score: "+c.parsed.y}}},
+      scales:{
+        x:{ticks:{color:"#555",font:{size:10}},grid:{color:"rgba(255,255,255,0.04)"}},
+        y:{beginAtZero:true,max:100,ticks:{color:"#555",font:{size:10}},grid:{color:"rgba(255,255,255,0.04)"}}
+      }
+    }
+  });
+  updateStatsPanel();
+}
+
+function updateChart(){
+  if(!myChart) return;
+  const labels=[],data=[];
+  for(let i=1;i<=S.day;i++){
+    labels.push("D"+i);
+    data.push(i===S.day?todayScore():S.history[i]||0);
+  }
+  myChart.data.labels=labels;
+  myChart.data.datasets[0].data=data;
+  myChart.data.datasets[0].pointRadius=data.length<=40?2:0;
+  myChart.update();
+  updateStatsPanel();
+}
+
+function updateStatsPanel(){
+  const tot=totalScore();
+  const doneCount=S.done.length;
+  const days=Math.max(1,S.day-1);
+  const scores=Object.values(S.history);
+  const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+  const pct=Math.round((S.day/MAXDAY)*100);
+  document.getElementById("ss-day").textContent=S.day;
+  document.getElementById("ss-done").textContent=doneCount;
+  document.getElementById("ss-total").textContent=tot;
+  document.getElementById("ss-avg").textContent=avg;
+  document.getElementById("spct").textContent=pct+"%";
+  document.getElementById("spfill").style.width=pct+"%";
+}
+
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+</script>
 </body>
 </html>
