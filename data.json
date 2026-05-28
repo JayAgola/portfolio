@@ -1,6 +1,10 @@
 {
   "day": 1,
-  "done": [],
-  "history": {},
+  "done": [
+    1
+  ],
+  "history": {
+    "1": 33
+  },
   "custom": {}
 }
